@@ -21,7 +21,7 @@ async def insert_client(client: InsertClientData,request: Request):
 
             id_employee = get_cookies(request)
             sql = "INSERT INTO subscribe (ID_EMPLOYEE, ID_CLIENT, DATE_SUBSCRIBE, CITY_SUBSCRIBE) VALUES (%s, %s, current_date(), %s)"
-            values = (id_employee,client.id_client,client.city_susbcribe)
+            values = (id_employee,client.id_client,client.city_subscribe)
             cursor.execute(sql,values)
             conn.commit()
 
