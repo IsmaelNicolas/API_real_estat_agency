@@ -53,7 +53,7 @@ async def login_user(login_data: LoginData,response:Response):
             employee = response2dict(answer)   
 
             if employee['password_employee'] != generateSha3(login_data.password_employee):
-                raise HTTPException(status_code=400, detail="Incorrect password")
+                raise HTTPException(status_code=401, detail="Incorrect password")
             
             token_data = {
                 'iss': employee['id_employee'],

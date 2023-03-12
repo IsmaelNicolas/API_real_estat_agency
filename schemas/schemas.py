@@ -13,7 +13,7 @@ class InsertClientData(BaseModel):
     email_client: str
     direction_client: str
     marital_status_client: str
-    city_suscribe: str
+    city_susbcribe: str
 
 class ReturnClientData(BaseModel):
     id_client: str
