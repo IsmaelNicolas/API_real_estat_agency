@@ -28,7 +28,6 @@ class ReturnClientData(BaseModel):
 
 class InsertEconomicData(BaseModel):
     id_client: Optional[str]
-    spouse_name: str
     spouse_lastname: str
     spouse_ocupation: str
     spouse_direction: str
