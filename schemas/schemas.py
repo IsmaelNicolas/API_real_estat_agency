@@ -9,11 +9,11 @@ class InsertClientData(BaseModel):
     id_client: str
     name_client: str
     lastname_client: str
-    phone_client: str
     email_client: str
+    phone_client: str
+    city_susbcribe: str
     direction_client: str
     marital_status_client: str
-    city_susbcribe: str
 
 class ReturnClientData(BaseModel):
     id_client: str
