@@ -9,27 +9,19 @@ import uvicorn
 
 app = FastAPI()
 
-middleware = CORSMiddleware(
-    app=app,
-    allow_origins=["*"],
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173","http://localhost:2303"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 app.include_router(auth)
 app.include_router(client)
 
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
-async def client_middleware(request: Request, call_next):
-    response = await call_next(request)
-    if response.status_code == 404:
-        file_path = "./static/index.html"
-        content = open(file_path, "r").read()
-        return HTMLResponse(content=content)
-    return response
-
-app.middleware("http")(client_middleware)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=2303)

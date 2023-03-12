@@ -154,3 +154,27 @@ async def get_spouse_data(id_client:str,request:Request):
         raise e
     except Exception as e:
         raise HTTPException(status_code=409,detail={e})
+    
+
+@client.get('/api/employees')
+async def get_employees(request: Request):
+
+    conn = connection()
+    try:
+        with conn.cursor() as cursor:
+
+            sql = "SELECT ID_EMPLOYEE, EMP_ID_EMPLOYEE, NAME_EMPLOYEE, LASTNAME_EMPLOYEE FROM employee WHERE POSITION_EMPLOYEE  = 'emp' OR POSITION_EMPLOYEE  = 'jefe' ORDER BY CASE WHEN POSITION_EMPLOYEE  = 'jefe' THEN ID_EMPLOYEE ELSE EMP_ID_EMPLOYEE end;"
+            cursor.execute(sql,())
+            answer = cursor.fetchall()
+
+            if answer is None:
+                raise HTTPException(status_code=404, detail="Client not found")
+                
+            return [response2dict(answer=el) for el in answer]
+        
+        
+    except HTTPException as e:
+        raise e
+
+    except Exception as e:
+        raise HTTPException(status_code=409, detail=str(e))
