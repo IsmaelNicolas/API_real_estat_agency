@@ -23,6 +23,6 @@ jobs:
         password: ${{ secrets.PASSWORD }}
         port: ${{ secrets.PORT }}
         script: |
-          cd /var/www/toorble.com/API_real_estat_agency
+          cd /var/www/toorblue.com/API_real_estat_agency
           git pull
           sudo systemctl restart uvicorn.service
