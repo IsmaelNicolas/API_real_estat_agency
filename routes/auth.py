@@ -11,7 +11,7 @@ auth = APIRouter()
 secret_key = SECRET_KEY
 
 @auth.get("/api/user",response_model=Dict[str,str])
-def get_user(request: Request):
+async def get_user(request: Request):
     cookie = None
     conn = connection()
     try:
@@ -38,7 +38,7 @@ def get_user(request: Request):
         conn.close()
 
 @auth.post("/api/login",response_model=Dict[str,str])
-def login_user(login_data: LoginData,response:Response):
+async def login_user(login_data: LoginData,response:Response):
     employee = {}
     try:
         conn = connection()
@@ -81,7 +81,7 @@ def login_user(login_data: LoginData,response:Response):
     return {"message": "Autenticación exitosa"}
 
 @auth.post("/api/register",response_model=Dict[str,str])
-def register_user(employee: Employee):
+async def register_user(employee: Employee):
 
     try:
         conn = connection()
@@ -101,7 +101,7 @@ def register_user(employee: Employee):
     return employee
 
 @auth.get("/api/logout")
-def logout_user(response:Response):
+async def logout_user(response:Response):
     try:
         response.delete_cookie(key='jwt')
     except Exception as e:

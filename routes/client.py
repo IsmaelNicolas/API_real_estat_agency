@@ -6,7 +6,7 @@ from schemas.schemas import InsertClientData,InsertEconomicData
 client = APIRouter()
 
 @client.post('/api/clients/insert')
-def insert_client(client: InsertClientData,request: Request):
+async def insert_client(client: InsertClientData,request: Request):
     try:
         conn = connection()
         
@@ -35,7 +35,7 @@ def insert_client(client: InsertClientData,request: Request):
         conn.close()
 
 @client.get('/api/client/{id_client}')
-def get_client(id_client:str,request: Request):
+async def get_client(id_client:str,request: Request):
 
     conn = connection()
     try:
@@ -60,7 +60,7 @@ def get_client(id_client:str,request: Request):
         raise HTTPException(status_code=409, detail=str(e))
 
 @client.put('/api/clients/insert/economiccard')
-def insert_data_client(client:InsertEconomicData,request: Request):
+async def insert_data_client(client:InsertEconomicData,request: Request):
     
     try:
         conn = connection()
@@ -107,7 +107,7 @@ def insert_data_client(client:InsertEconomicData,request: Request):
         raise e
 
 @client.get('/api/economic/{id_client}')
-def get_economic_data(id_client:str,request:Request):
+async def get_economic_data(id_client:str,request:Request):
     conn = connection()
     try:
         with conn.cursor() as cursor:
@@ -123,7 +123,7 @@ def get_economic_data(id_client:str,request:Request):
         raise HTTPException(status_code=409,detail={e})
     
 @client.get('/api/spouse/{id_client}')
-def get_spouse_data(id_client:str,request:Request):
+async def get_spouse_data(id_client:str,request:Request):
     conn = connection()
     try:
         with conn.cursor() as cursor:
@@ -140,7 +140,7 @@ def get_spouse_data(id_client:str,request:Request):
     
 
 @client.get('/api/stage/{id_client}')
-def get_spouse_data(id_client:str,request:Request):
+async def get_spouse_data(id_client:str,request:Request):
     conn = connection()
     try:
         with conn.cursor() as cursor:
