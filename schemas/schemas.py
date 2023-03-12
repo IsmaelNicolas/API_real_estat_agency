@@ -11,7 +11,7 @@ class InsertClientData(BaseModel):
     lastname_client: str
     email_client: str
     phone_client: str
-    city_susbcribe: str
+    city_subscribe: str
     direction_client: str
     marital_status_client: str
 
