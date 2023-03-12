@@ -37,7 +37,7 @@ async def get_user(request: Request):
     finally:
         conn.close()
 
-@auth.post("/api/login",response_model=Dict[str,str])
+@auth.post("/api/login")
 async def login_user(login_data: LoginData,response:Response):
     employee = {}
     try:
@@ -49,7 +49,7 @@ async def login_user(login_data: LoginData,response:Response):
 
             if answer is None:
                 raise HTTPException(status_code=404, detail="User not found")
-            
+
             employee = response2dict(answer)   
 
             if employee['password_employee'] != generateSha3(login_data.password_employee):
@@ -77,7 +77,6 @@ async def login_user(login_data: LoginData,response:Response):
     except Exception as e:
        raise HTTPException(status_code=409, detail=str(e))
     finally:
-        cursor.close()
         conn.close()
 
 
