@@ -22,6 +22,16 @@ app.include_router(client)
 
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
+def not_found(request: Request):
+    with open("index.html", "r") as f:
+        content = f.read()
+    return HTMLResponse(content=content)
+
+@app.middleware("http")
+async def not_found(request: Request):
+    with open("static/index.html", "r") as f:
+        content = f.read()
+    return HTMLResponse(content=content)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=2303)
