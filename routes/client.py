@@ -11,7 +11,7 @@ async def insert_client(client: InsertClientData,request: Request):
         conn = connection()
         
         with conn.cursor() as cursor:
-            
+            print(client)
             sql = "INSERT INTO client (ID_CLIENT, NAME_CLIENT, LASTNAME_CLIENT, PHONE_CLIENT, EMAIL_CLIENT, DIRECTION_CLIENT, MARITAL_STATUS_CLIENT) VALUES (%s, %s, %s, %s, %s, %s, %s);"
             values = (client.id_client,client.name_client,client.lastname_client,client.phone_client,client.email_client,client.direction_client,client.marital_status_client)
             cursor.execute(sql,values)
