@@ -70,6 +70,8 @@ async def login_user(login_data: LoginData,response:Response):
                 samesite= 'None',
                 secure= True
             )
+            return employee
+        
     except HTTPException as e:
         raise e
     except Exception as e:
@@ -78,7 +80,6 @@ async def login_user(login_data: LoginData,response:Response):
         cursor.close()
         conn.close()
 
-    return employee
 
 @auth.post("/api/register",response_model=Dict[str,str])
 async def register_user(employee: Employee):
