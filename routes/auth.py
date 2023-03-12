@@ -78,7 +78,7 @@ async def login_user(login_data: LoginData,response:Response):
         cursor.close()
         conn.close()
 
-    return {"message": "Autenticación exitosa"}
+    return employee
 
 @auth.post("/api/register",response_model=Dict[str,str])
 async def register_user(employee: Employee):
