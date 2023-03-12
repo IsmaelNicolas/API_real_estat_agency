@@ -29,7 +29,7 @@ async def client_middleware(request: Request, call_next):
         return HTMLResponse(content=content)
     return response
 
-app.middleware("https")(client_middleware)
+app.middleware("http")(client_middleware)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=2303)
