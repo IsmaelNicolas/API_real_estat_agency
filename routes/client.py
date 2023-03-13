@@ -146,10 +146,11 @@ async def get_spouse_data(id_client:str,request:Request):
         with conn.cursor() as cursor:
             sql =  "SELECT stage.NAME_STAGE, stage_client.STAGE_START_DATE, stage_client.STAGE_END_DATE,stage_client.CONDITIONS FROM stage_client  JOIN stage ON stage.ID_STAGE = stage_client.ID_STAGE where stage_client.ID_CLIENT = %s"
             cursor.execute(sql,(id_client))
-            answer = cursor.fetchone()
+            answer = cursor.fetchall()
             if answer is None:
                 raise HTTPException(status_code=404, detail="Client not found")
-            return response2dict(answer=answer)
+            
+            return [response2dict(answer=ans) for ans in answer]
     except HTTPException as e:
         raise e
     except Exception as e:
