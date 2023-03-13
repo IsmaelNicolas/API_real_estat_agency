@@ -116,7 +116,7 @@ async def get_economic_data(id_client:str,request:Request):
             answer = cursor.fetchone()
             if answer is None:
                 raise HTTPException(status_code=404, detail="Client not found")
-            return answer
+            return response2dict(answer=answer)
     except HTTPException as e:
         raise e
     except Exception as e:
@@ -132,7 +132,7 @@ async def get_spouse_data(id_client:str,request:Request):
             answer = cursor.fetchone()
             if answer is None:
                 raise HTTPException(status_code=404, detail="Client not found")
-            return answer
+            return response2dict(answer=answer)
     except HTTPException as e:
         raise e
     except Exception as e:
@@ -149,7 +149,7 @@ async def get_spouse_data(id_client:str,request:Request):
             answer = cursor.fetchone()
             if answer is None:
                 raise HTTPException(status_code=404, detail="Client not found")
-            return answer
+            return response2dict(answer=answer)
     except HTTPException as e:
         raise e
     except Exception as e:
