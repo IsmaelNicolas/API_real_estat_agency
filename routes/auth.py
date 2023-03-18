@@ -23,7 +23,7 @@ async def get_user(request: Request):
             cookie = jwt.decode(cookie,secret_key,algorithms=['HS256'])
             id_employee = cookie['iss']
             
-            sql = "SELECT * FROM employee WHERE id_employee = %s;"
+            sql = "SELECT * FROM EMPLOYEE WHERE id_employee = %s;"
             cursor.execute(sql,(id_employee))
             answer = cursor.fetchone()
             if answer is None:
@@ -43,7 +43,7 @@ async def login_user(login_data: LoginData,response:Response):
     try:
         conn = connection()
         with conn.cursor() as cursor:
-            sql = "SELECT * FROM employee WHERE email_employee = %s"
+            sql = "SELECT * FROM EMPLOYEE WHERE email_employee = %s"
             cursor.execute(sql, (login_data.email_employee))
             answer = cursor.fetchone()
 
@@ -88,7 +88,7 @@ async def register_user(employee: Employee):
         employee.password_employee = generateSha3(employee.password_employee)
         with conn.cursor() as cursor:
             print(employee)
-            sql = "INSERT INTO employee (ID_EMPLOYEE, EMP_ID_EMPLOYEE, NAME_EMPLOYEE, LASTNAME_EMPLOYEE, EMAIL_EMPLOYEE, PASSWORD_EMPLOYEE, PERMISSIONS,POSITION_EMPLOYEE) VALUES(uuid(), %s ,%s , %s, %s, %s, 'emp','emp');"
+            sql = "INSERT INTO EMPLOYEE (ID_EMPLOYEE, EMP_ID_EMPLOYEE, NAME_EMPLOYEE, LASTNAME_EMPLOYEE, EMAIL_EMPLOYEE, PASSWORD_EMPLOYEE, PERMISSIONS,POSITION_EMPLOYEE) VALUES(uuid(), %s ,%s , %s, %s, %s, 'emp','emp');"
             cursor.execute(sql,(employee.emp_id_employee,employee.name_employee,employee.lastname_employee,employee.email_employee,employee.password_employee))
         conn.commit()
     except Exception as e:

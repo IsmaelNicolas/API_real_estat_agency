@@ -30,9 +30,11 @@ def not_found(request: Request):
 @app.middleware("http")
 async def custom_not_found(request: Request, call_next):
     response = await call_next(request)
-    if response.status_code == 404:
+    print(response.body_iterator)
+    if response.status_code == 404 and not request.url.path.startswith("/api/"):
         return not_found(request)
     return response
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=2303)

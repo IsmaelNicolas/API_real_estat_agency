@@ -4,7 +4,7 @@ import pymysql
 HOST = 'toorblue.com'
 USER = 'in23'
 PASSWORD = 'toor'
-DATABASE ='consorcio'
+DATABASE ='inmobiliaria'
 
 def connection():
     return pymysql.connect(
