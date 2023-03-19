@@ -216,7 +216,7 @@ async def get_properties(request:Request):
     conn = connection()
     try:
         with conn.cursor() as cursor:
-            sql = "SELECT ID_PROPERTY, NEIGHBORHOOD, URBANIZATION, QUANTITY FROM PROPERTY;"
+            sql = "SELECT ID_PROPERTY, NEIGHBORHOOD, URBANIZATION, QUANTITY, AREA FROM PROPERTY;"
             cursor.execute(sql)
             answer = cursor.fetchall()
             
