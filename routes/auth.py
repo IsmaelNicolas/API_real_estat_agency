@@ -79,7 +79,6 @@ async def login_user(login_data: LoginData,response:Response):
     finally:
         conn.close()
 
-
 @auth.post("/api/register",response_model=Dict[str,str])
 async def register_user(employee: Employee):
 
