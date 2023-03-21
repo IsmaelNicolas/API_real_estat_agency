@@ -218,7 +218,11 @@ async def get_report_PDF(id_client:str):
 
     pdf.set_font('Arial', '',12)
     pdf.multi_cell(0, 10, part1)
-    pdf.content(data)
+
+    
+    pdf.content(data=data)
+
+
     pdf.set_font('Arial', '',12)
     pdf.multi_cell(0, 10, part2)
 
