@@ -17,6 +17,6 @@ class PDF(FPDF):
         # Define el contenido del documento
         self.set_font('Arial', '', 12)
         for item in data:
-            self.cell(20)
+            self.cell(10)
             self.cell(0,10,txt= "-" + item)
             self.ln(10)
