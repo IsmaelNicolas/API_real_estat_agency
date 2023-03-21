@@ -24,6 +24,7 @@ jobs:
         port: ${{ secrets.PORT }}
         script: |
           cd /var/www/consorcioaccion.com/API_real_estat_agency
+          git stash
           git pull
           pip install -r requirements.txt
           sudo systemctl restart uvicorn.service
