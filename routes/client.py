@@ -183,18 +183,45 @@ async def get_employees(request: Request):
     except Exception as e:
         raise HTTPException(status_code=409, detail=str(e))
 
+def get_data_report(id_client:str):
+    conn = connection()
+    try:
+        with conn.cursor() as cursor:
+            sql = ""
+            cursor.execute(sql,(id_client))
+            answer = cursor.fetchone()
+            if answer is None:
+                raise HTTPException(status_code=404, detail="Client not found")
+            
+            return response2dict(answer=answer)
+        
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=409,detail={e})
+
 @client.get('/api/report/{id_client}')
 async def get_report_PDF(id_client:str):
     
     data = [
-        ['Item 1', 'Descripción del item 1', 100],
-        ['Item 2', 'Descripción del item 2', 200],
-        ['Item 3', 'Descripción del item 3', 300],
+        "3 Últimos Roles de pago",
+        "1 Referencia Personal",
+        "1 Referencia Laboral",
+        "1 Certificado Bancaria"
     ]
     
+    part1 = f'Estimado/a Cliente [Nombre y Apellido], con cédula número [Número de Cédula], Nos comunicamos de parte de Consorcio Accion para informarle que necesitamos recibir cierta documentación de su parte para poder continuar brindándole nuestros servicios de manera efectiva. Como parte de nuestros procedimientos internos, necesitamos que nos proporcione los siguientes documentos:\n'
+    part2 = f'Es importante destacar que necesitamos recibir los documentos mencionados antes del [Fecha máxima para la entrega] al corre [correo empleado], de lo contrario, no podremos continuar brindándole nuestros servicios. Por favor, le pedimos que tome nota de esta fecha y que nos envíe los documentos lo antes posible.'
+
     # Generar el archivo PDF
     pdf = PDF()
+
+    pdf.set_font('Arial', '',12)
+    pdf.multi_cell(0, 10, part1)
     pdf.content(data)
+    pdf.set_font('Arial', '',12)
+    pdf.multi_cell(0, 10, part2)
+
 
     # Crear un archivo temporal para almacenar el PDF
     with tempfile.NamedTemporaryFile(delete=False) as f:
