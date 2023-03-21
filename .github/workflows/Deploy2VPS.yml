@@ -23,7 +23,7 @@ jobs:
         password: ${{ secrets.PASSWORD }}
         port: ${{ secrets.PORT }}
         script: |
-          cd /var/www/toorblue.com/API_real_estat_agency
+          cd /var/www/consorcioaccion.com/API_real_estat_agency
           git pull
           pip install -r requirements.txt
           sudo systemctl restart uvicorn.service
