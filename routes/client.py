@@ -224,7 +224,6 @@ async def get_report_PDF(id_client:str):
     pdf.set_font('Arial', '',12)
     pdf.multi_cell(0, 10, part2)
 
-
     # Crear un archivo temporal para almacenar el PDF
     with tempfile.NamedTemporaryFile(delete=False) as f:
         pdf.output(f.name)
