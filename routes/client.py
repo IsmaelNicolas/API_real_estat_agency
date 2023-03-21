@@ -187,7 +187,7 @@ def get_data_report(id_client:str):
     conn = connection()
     try:
         with conn.cursor() as cursor:
-            sql = ""
+            sql = "SELECT C.NAME_CLIENT , C.LASTNAME_CLIENT  FROM CLIENT as c WHERE ID_CLIENT = %s"
             cursor.execute(sql,(id_client))
             answer = cursor.fetchone()
             if answer is None:
@@ -218,7 +218,7 @@ async def get_report_PDF(id_client:str):
 
     pdf.set_font('Arial', '',12)
     pdf.multi_cell(0, 10, part1)
-        
+
     pdf.content(data=data)
 
     pdf.set_font('Arial', '',12)
