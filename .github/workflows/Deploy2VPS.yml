@@ -6,7 +6,7 @@ on:
       - master
 
 jobs:
-  despliegue:
+  Deploy2VPS:
     runs-on: ubuntu-latest
 
     steps:
