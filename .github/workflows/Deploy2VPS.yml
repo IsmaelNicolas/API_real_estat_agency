@@ -23,7 +23,7 @@ jobs:
         password: ${{ secrets.PASSWORD }}
         port: ${{ secrets.PORT }}
         script: |
-          sudo cd /var/www/consorcioaccion.com/API_real_estat_agency
-          sudo git pull
-          sudo pip install -r requirements.txt
+          cd /var/www/consorcioaccion.com/API_real_estat_agency
+          git pull
+          pip install -r requirements.txt
           sudo systemctl restart uvicorn.service
