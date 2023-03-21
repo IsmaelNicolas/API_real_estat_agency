@@ -11,7 +11,7 @@ class Employee(BaseModel):
     position_employee: Optional[str]
     permissions: Optional[str]
 
-    def __init__(self, name_employee: str, lastname_employee: str, email_employee: str, password_employee: str, position_employee: Optional[str] = None, permissions:Optional[str] = None, id_employee: Optional[str] = None, emp_id_employee: Optional[str] = None):
+    def __init__(self, name_employee: str, lastname_employee: str, email_employee: str, password_employee: str, position_employee: Optional[str] = "", permissions:Optional[str] = "", id_employee: Optional[str] = None, emp_id_employee: Optional[str] = None):
         super().__init__(
             id_employee=id_employee,
             emp_id_employee=emp_id_employee,
