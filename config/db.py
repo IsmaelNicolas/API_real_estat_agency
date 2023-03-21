@@ -1,10 +1,11 @@
 import pymysql
 
 
-HOST = 'toorblue.com'
-USER = 'in23'
-PASSWORD = 'toor'
+HOST = '162.222.203.47'
+USER = 'root'
+PASSWORD = 'mysqlHom@rsin2023'
 DATABASE ='inmobiliaria'
+PORT = 3307
 
 def connection():
     return pymysql.connect(
@@ -12,6 +13,7 @@ def connection():
         user=USER,
         password=PASSWORD,
         database=DATABASE,
+        port=PORT,
         cursorclass=pymysql.cursors.DictCursor
     )
 

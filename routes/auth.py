@@ -17,6 +17,7 @@ async def get_user(request: Request):
     try:
         with conn.cursor() as cursor:
             if "jwt" not in  request.cookies:
+                print("No hay cookie")
                 raise HTTPException(status_code=401, detail="No autenticado")
             
             cookie: str = request.cookies["jwt"]
@@ -67,9 +68,10 @@ async def login_user(login_data: LoginData,response:Response):
                 value=token,
                 expires=time.time() + 24 * 60 * 60,
                 httponly= True,
-                samesite= 'None',
+                samesite= 'none',
                 secure= True
             )
+            print("Logeado")
             return employee
         
     except HTTPException as e:
