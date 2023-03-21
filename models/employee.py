@@ -8,8 +8,8 @@ class Employee(BaseModel):
     lastname_employee: str
     email_employee: str
     password_employee: str
-    position_employee: str
-    permissions: str
+    position_employee: Optional[str]
+    permissions: Optional[str]
 
     def __init__(self, name_employee: str, lastname_employee: str, email_employee: str, password_employee: str, position_employee: str, permissions: str, id_employee: Optional[str] = None, emp_id_employee: Optional[str] = None):
         super().__init__(
