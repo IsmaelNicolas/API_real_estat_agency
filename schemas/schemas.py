@@ -18,9 +18,9 @@ class InsertPropertyData(BaseModel):
     id_property: str
     area:str
     neighborhood:str
-    quantity:int
+    quantity:str
     urbanization:str
-    minimum:int
+    minimum:str
 
 class InsertClientData(BaseModel):
     id_client: str
