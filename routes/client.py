@@ -118,8 +118,12 @@ async def get_economic_data(id_client:str,request:Request):
             sql = "SELECT  OCUPATION_CLIENT, SALARY_CLIENT, ENTITY_CLIENT, DIRECTION_ENTITY FROM CLIENT WHERE ID_CLIENT= %s;"
             cursor.execute(sql,(id_client))
             answer = cursor.fetchone()
+            if answer is None:
+                raise HTTPException(status_code=404, detail="Client economic not found")
+
             if None in answer.values():
                 raise HTTPException(status_code=404, detail="Client economic not found")
+            
             return response2dict(answer=answer)
     except HTTPException as e:
         raise e
@@ -135,6 +139,8 @@ async def get_spouse_data(id_client:str,request:Request):
             cursor.execute(sql,(id_client))
             answer = cursor.fetchone()
             print(answer)
+            if answer is None:
+                raise HTTPException(status_code=404, detail="spouse not found")
             if None in answer.values():
                 raise HTTPException(status_code=404, detail="spouse not found")
             return response2dict(answer=answer)
