@@ -56,6 +56,6 @@ class InsertEconomicData(BaseModel):
     client_salary: float
     client_entity: str
     entity_direction: str
-    type_property: str
-    property_direction: str
+    id_property: str
     payment: float
+

@@ -75,8 +75,8 @@ async def insert_data_client(client:InsertEconomicData,request: Request):
         conn.commit()
 
         with conn.cursor() as cursor:
-            sql = "INSERT INTO PROPERTY (ID_CLIENT, ID_PROPERTY, TYPE_PROPERTY, NEIGHBORHOOD) VALUES (%s, uuid(), %s, %s)"
-            values = (client.id_client,client.type_property,client.property_direction)
+            sql = "INSERT INTO PURCHASE (ID_CLIENT, ID_PROPERTY) VALUES(%s, %s);"
+            values = (client.id_client,client.id_property)
             cursor.execute(sql,values)
         conn.commit()
 
@@ -142,7 +142,6 @@ async def get_spouse_data(id_client:str,request:Request):
     except Exception as e:
         raise HTTPException(status_code=409,detail={e})
     
-
 @client.get('/api/stage/{id_client}')
 async def get_stage_data(id_client:str,request:Request):
     conn = connection()
