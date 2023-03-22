@@ -51,7 +51,7 @@ async def get_client(id_client:str,request: Request):
             cursor.execute(sql,(id_client))
             answer = cursor.fetchone()
 
-            if answer is None:
+            if None in answer.values():
                 raise HTTPException(status_code=404, detail="Client not found")
                 
             return response2dict(answer=answer)
@@ -118,8 +118,8 @@ async def get_economic_data(id_client:str,request:Request):
             sql = "SELECT  OCUPATION_CLIENT, SALARY_CLIENT, ENTITY_CLIENT, DIRECTION_ENTITY FROM CLIENT WHERE ID_CLIENT= %s;"
             cursor.execute(sql,(id_client))
             answer = cursor.fetchone()
-            if answer is None:
-                raise HTTPException(status_code=404, detail="Client not found")
+            if None in answer.values():
+                raise HTTPException(status_code=404, detail="Client economic not found")
             return response2dict(answer=answer)
     except HTTPException as e:
         raise e
@@ -134,8 +134,9 @@ async def get_spouse_data(id_client:str,request:Request):
             sql = "SELECT ID_CLIENT,SPOUSE_NAME, SPOUSE_OCUPATION, SPOUSE_DIRECTION, SPOUSE_SALARY, SPOUSE_ENTITY  FROM CLIENT where ID_CLIENT = %s;"
             cursor.execute(sql,(id_client))
             answer = cursor.fetchone()
-            if answer is None:
-                raise HTTPException(status_code=404, detail="Client not found")
+            print(answer)
+            if None in answer.values():
+                raise HTTPException(status_code=404, detail="spouse not found")
             return response2dict(answer=answer)
     except HTTPException as e:
         raise e
@@ -150,7 +151,7 @@ async def get_stage_data(id_client:str,request:Request):
             sql =  "SELECT STAGE.NAME_STAGE, STAGE_CLIENT.STAGE_START_DATE, STAGE_CLIENT.STAGE_END_DATE,STAGE_CLIENT.CONDITIONS FROM STAGE_CLIENT  JOIN STAGE ON STAGE.ID_STAGE = STAGE_CLIENT.ID_STAGE where STAGE_CLIENT.ID_CLIENT = %s"
             cursor.execute(sql,(id_client))
             answer = cursor.fetchall()
-            if answer is ():
+            if answer == ():
                 raise HTTPException(status_code=404, detail="Stage not foud")
             
             return [response2dict(answer=ans) for ans in answer]
