@@ -222,7 +222,7 @@ async def get_report_PDF(id_client:str,request: Request):
     values = {}
     values = get_data_report(id_client=id_client,id_employee=id_employee)
 
-    print(values)
+    print(values["name_client"]+ " " + values["lastname_client"] + " " + str(values["stage_start_date"]))
 
     part1 = f'Estimado/a Cliente {values["name_client"]+ " " + values["lastname_client"]}, con cédula número {id_client}. Nos comunicamos de parte de Consorcio Acción para informarle que necesitamos recibir cierta documentación de su parte para poder continuar brindándole nuestros servicios de manera efectiva. Como parte de nuestros procedimientos internos, necesitamos que nos proporcione los siguientes documentos:\n'
     part2 = f'Es importante destacar que necesitamos recibir los documentos mencionados antes del {str(values["stage_start_date"])} al correo {values["email_employee"]}, de lo contrario, no podremos continuar brindándole nuestros servicios. Por favor, le pedimos que tome nota de esta fecha y que nos envíe los documentos lo antes posible.'
