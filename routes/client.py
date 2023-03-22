@@ -101,7 +101,7 @@ async def insert_data_client(client:InsertEconomicData,request: Request):
             #insert_to_table(conn, client.id_client, i+1, dates[i], dates[i+1])
             sql = "INSERT INTO STAGE_CLIENT (ID_CLIENT, ID_STAGE, STAGE_START_DATE, STAGE_END_DATE, CONDITIONS) VALUES (%s, %s, %s, %s, 0);"
             with conn.cursor() as cursor:
-                cursor.execute(sql, (client.id_client, i+1, dates[i],dates[i]))
+                cursor.execute(sql, (client.id_client, i+1, dates[i],dates[i+1]))
             conn.commit()
         
         conn.close()  
@@ -296,3 +296,69 @@ async def insert_property(property:InsertPropertyData):
        raise HTTPException(status_code=409, detail=str(e))
     finally:
         conn.close()
+
+def get_stage_report_data(id_client:str):
+    conn = connection()
+    try:
+        with conn.cursor() as cursor:
+            sql =  "SELECT c.ID_CLIENT,c.NAME_CLIENT ,c.LASTNAME_CLIENT from CLIENT as c WHERE ID_CLIENT =  %s;"
+            cursor.execute(sql,(id_client))
+            person = cursor.fetchone()
+            if person == ():
+                raise HTTPException(status_code=404, detail="Stage not foud")
+        
+        with conn.cursor() as cursor:
+            sql =  "SELECT sc.STAGE_START_DATE , sc.STAGE_END_DATE , s.NAME_STAGE  from STAGE_CLIENT as sc, STAGE as s  WHERE ID_CLIENT = %s and s.ID_STAGE =sc.ID_STAGE ;"
+            cursor.execute(sql,(id_client))
+            stage = cursor.fetchall()
+            if stage == ():
+                raise HTTPException(status_code=404, detail="Stage not foud")
+            
+        with conn.cursor() as cursor:
+            sql =  "SELECT p.DATE_PAYMENT ,p.VALUE_PAYMENT  from PAYMENT as p, PURCHASE as pu where p.ID_PROPERTY = pu.ID_PROPERTY and pu.ID_CLIENT = %s"
+            cursor.execute(sql,(id_client))
+            payment = cursor.fetchone()
+            if stage == ():
+                raise HTTPException(status_code=404, detail="Stage not foud")
+        
+        return response2dict(person) ,[response2dict(answer=ans) for ans in stage], response2dict(payment)
+        
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=409,detail={e})
+
+@client.get('/api/reportstage/{id_client}')
+async def get_stage_report(id_client:str):
+
+    person,stages,payment = get_stage_report_data(id_client)
+    print(payment)
+
+    part1 = f'Cliente: {person["name_client"]} {person["lastname_client"]} \nCedula: {person["id_client"]} \nFecha del pago: {payment["date_payment"]} \nCantidad: ${payment["value_payment"]} \n'
+
+    pdf = PDF()
+
+    pdf.set_font('Arial', '',12)
+
+    pdf.multi_cell(0, 10, part1)
+    pdf.cell(0,10,'Etapas')
+    pdf.ln(10)
+    for stage in stages:
+        text = f'{stage["name_stage"]}: \n\tFecha inicio: {stage["stage_start_date"]}, \n\tFecha fin: {stage["stage_end_date"]}'
+        pdf.cell(0,10,text)
+        pdf.ln(10)
+
+    # Crear un archivo temporal para almacenar el PDF
+    with tempfile.NamedTemporaryFile(delete=False) as f:
+        pdf.output(f.name)
+        filename = f.name
+
+    # Leer el archivo temporal y devolver su contenido como respuesta HTTP
+    with open(filename, mode='rb') as f:
+        content = f.read()
+
+    os.unlink(filename) # Eliminar el archivo temporal
+
+    response = Response(content=content, media_type='application/pdf')
+    response.headers['Content-Disposition'] = f'attachment; filename= etapas.pdf'
+    return response
