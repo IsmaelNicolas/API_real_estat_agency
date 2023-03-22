@@ -5,6 +5,15 @@ class LoginData(BaseModel):
     email_employee: str
     password_employee: str
 
+class InsertEmployee(BaseModel):
+    id_employee: Optional[str]
+    emp_id_employee: Optional[str]
+    name_employee: str
+    lastname_employee: str
+    email_employee: str
+    password_employee: str
+
+
 class InsertClientData(BaseModel):
     id_client: str
     name_client: str

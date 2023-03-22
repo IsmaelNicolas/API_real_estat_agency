@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, FastAPI, Request,Response
-from schemas.schemas import LoginData
+from schemas.schemas import LoginData, InsertEmployee
 from models.employee import Employee
 from config.db import connection,SECRET_KEY
 from utils.Utils import response2dict,generateSha3
@@ -82,7 +82,7 @@ async def login_user(login_data: LoginData,response:Response):
         conn.close()
 
 @auth.post("/api/register",response_model=Dict[str,str])
-async def register_user(employee: Employee):
+async def register_user(employee: InsertEmployee):
 
     try:
         conn = connection()
