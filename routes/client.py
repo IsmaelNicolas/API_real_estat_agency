@@ -257,7 +257,7 @@ async def get_report_PDF(id_client:str,request: Request):
     os.unlink(filename) # Eliminar el archivo temporal
 
     response = Response(content=content, media_type='application/pdf')
-    response.headers['Content-Disposition'] = f'attachment; filename=reporte.pdf'
+    response.headers['Content-Disposition'] = f'attachment; filename={values["name_client"]+ " " + values["lastname_client"] + " " + str(values["stage_start_date"])}.pdf'
     return response
     
 @client.get('/api/properties')
