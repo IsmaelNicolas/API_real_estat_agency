@@ -147,13 +147,14 @@ async def get_stage_data(id_client:str,request:Request):
     conn = connection()
     try:
         with conn.cursor() as cursor:
-            sql =  "SELECT stage.NAME_STAGE, STAGE_CLIENT.STAGE_START_DATE, STAGE_CLIENT.STAGE_END_DATE,stage_client.CONDITIONS FROM STAGE_CLIENT  JOIN stage ON stage.ID_STAGE = STAGE_CLIENT.ID_STAGE where STAGE_CLIENT.ID_CLIENT = %s"
+            sql =  "SELECT STAGE.NAME_STAGE, STAGE_CLIENT.STAGE_START_DATE, STAGE_CLIENT.STAGE_END_DATE,STAGE_CLIENT.CONDITIONS FROM STAGE_CLIENT  JOIN STAGE ON STAGE.ID_STAGE = STAGE_CLIENT.ID_STAGE where STAGE_CLIENT.ID_CLIENT = %s"
             cursor.execute(sql,(id_client))
             answer = cursor.fetchall()
-            if answer is None:
-                raise HTTPException(status_code=404, detail="Client not found")
+            if answer is ():
+                raise HTTPException(status_code=404, detail="Stage not foud")
             
             return [response2dict(answer=ans) for ans in answer]
+        
     except HTTPException as e:
         raise e
     except Exception as e:
