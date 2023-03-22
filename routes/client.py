@@ -268,7 +268,7 @@ async def insert_property(property:InsertPropertyData):
             values = (property.id_property,property.neighborhood,property.urbanization,property.area,property.minimum,property.quantity)
             cursor.execute(sql,values)
             conn.commit()
-
+        return property
     except Exception as e:
        conn.rollback()
        print(e)
