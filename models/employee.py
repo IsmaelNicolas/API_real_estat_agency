@@ -24,7 +24,7 @@ class Employee(BaseModel):
         )
         if self.id_employee is None:
             self.id_employee = ""
-        if self.emp_id_employee is None:
+        if self.emp_id_employee is None or self.emp_id_employee is "":
             self.emp_id_employee = "null"
         if self.position_employee is None:
             self.position_employee = "emp"
