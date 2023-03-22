@@ -94,14 +94,13 @@ async def register_user(employee: InsertEmployee):
             sql = "INSERT INTO EMPLOYEE (ID_EMPLOYEE, EMP_ID_EMPLOYEE, NAME_EMPLOYEE, LASTNAME_EMPLOYEE, EMAIL_EMPLOYEE, PASSWORD_EMPLOYEE, PERMISSIONS,POSITION_EMPLOYEE) VALUES(uuid(), %s ,%s , %s, %s, %s, 'emp','emp');"
             cursor.execute(sql,(employee.emp_id_employee,employee.name_employee,employee.lastname_employee,employee.email_employee,employee.password_employee))
         conn.commit()
+        return employee
     except Exception as e:
        conn.rollback()
        print(e)
        raise HTTPException(status_code=409, detail=str(e))
     finally:
         conn.close()
-
-    return employee
 
 @auth.get("/api/logout")
 async def logout_user(response:Response):

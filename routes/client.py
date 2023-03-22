@@ -2,7 +2,7 @@ from io import BytesIO
 from fastapi import APIRouter, HTTPException,  Request,Response
 from config.db import connection
 from utils.Utils import get_cookies,response2dict,addThreeMonths
-from schemas.schemas import InsertClientData,InsertEconomicData
+from schemas.schemas import InsertClientData,InsertEconomicData,InsertPropertyData
 from models.PDF import PDF
 import tempfile
 import os
@@ -257,3 +257,21 @@ async def get_properties(request:Request):
     except Exception as e:
         raise HTTPException(status_code=409,detail={e})
     
+@client.post('/api/insert/property')
+async def insert_property(property:InsertPropertyData):
+
+    try:
+        conn = connection()
+        with conn.cursor() as cursor:
+
+            sql = "INSERT INTO PROPERTY (ID_PROPERTY, NEIGHBORHOOD, URBANIZATION, AREA, MINIMUM, QUANTITY) VALUES(%s,%s , %s,%s, %d, %d);"
+            values = (property.id_property,property.neighborhood,property.urbanization,property.area,property.minimum,property.quantity)
+            cursor.execute(sql,values)
+            conn.commit()
+
+    except Exception as e:
+       conn.rollback()
+       print(e)
+       raise HTTPException(status_code=409, detail=str(e))
+    finally:
+        conn.close()

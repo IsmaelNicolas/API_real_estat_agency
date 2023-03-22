@@ -13,6 +13,14 @@ class InsertEmployee(BaseModel):
     email_employee: str
     password_employee: str
 
+class InsertPropertyData(BaseModel):
+    emp_id_employee: Optional[str]
+    id_property: str
+    area:str
+    neighborhood:str
+    quantity:int
+    urbanization:str
+    minimum:int
 
 class InsertClientData(BaseModel):
     id_client: str
