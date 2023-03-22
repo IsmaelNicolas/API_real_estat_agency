@@ -264,7 +264,7 @@ async def insert_property(property:InsertPropertyData):
         conn = connection()
         with conn.cursor() as cursor:
 
-            sql = "INSERT INTO PROPERTY (ID_PROPERTY, NEIGHBORHOOD, URBANIZATION, AREA, MINIMUM, QUANTITY) VALUES(%s,%s , %s,%s, %d, %d);"
+            sql = "INSERT INTO PROPERTY (ID_PROPERTY, NEIGHBORHOOD, URBANIZATION, AREA, MINIMUM, QUANTITY) VALUES(%s,%s , %s,%s, %s, %s);"
             values = (property.id_property,property.neighborhood,property.urbanization,property.area,property.minimum,property.quantity)
             cursor.execute(sql,values)
             conn.commit()
