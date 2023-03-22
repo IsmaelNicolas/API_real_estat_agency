@@ -1,10 +1,11 @@
 from io import BytesIO
 from fastapi import APIRouter, HTTPException,  Request,Response
-from config.db import connection
+from config.db import connection,SECRET_KEY
 from utils.Utils import get_cookies,response2dict,addThreeMonths
 from schemas.schemas import InsertClientData,InsertEconomicData,InsertPropertyData
 from models.PDF import PDF
 import tempfile
+import jwt
 import os
 
 client = APIRouter()
@@ -168,7 +169,7 @@ async def get_stage_data(id_client:str,request:Request):
         raise HTTPException(status_code=409,detail={e})
     
 @client.get('/api/employees')
-async def get_employees(request: Request):
+async def get_employees():
 
     conn = connection()
     try:
@@ -190,12 +191,13 @@ async def get_employees(request: Request):
     except Exception as e:
         raise HTTPException(status_code=409, detail=str(e))
 
-def get_data_report(id_client:str):
+def get_data_report(id_client:str,id_employee:str):
     conn = connection()
     try:
         with conn.cursor() as cursor:
-            sql = "SELECT C.NAME_CLIENT , C.LASTNAME_CLIENT  FROM CLIENT as c WHERE ID_CLIENT = %s"
-            cursor.execute(sql,(id_client))
+            
+            sql = "SELECT c.NAME_CLIENT, c.LASTNAME_CLIENT, sc.STAGE_START_DATE, e.EMAIL_EMPLOYEE FROM CLIENT c JOIN STAGE_CLIENT sc ON c.ID_CLIENT = sc.ID_CLIENT JOIN EMPLOYEE e ON e.ID_EMPLOYEE = %s WHERE sc.STAGE_START_DATE >= NOW() AND c.ID_CLIENT = %s ORDER BY sc.STAGE_START_DATE LIMIT 1 ;"
+            cursor.execute(sql,(id_employee,id_client))
             answer = cursor.fetchone()
             if answer is None:
                 raise HTTPException(status_code=404, detail="Client not found")
@@ -208,17 +210,29 @@ def get_data_report(id_client:str):
         raise HTTPException(status_code=409,detail={e})
 
 @client.get('/api/report/{id_client}')
-async def get_report_PDF(id_client:str):
+async def get_report_PDF(id_client:str,request: Request):
     
+    if "jwt" not in  request.cookies:
+        print("No hay cookie")
+        raise HTTPException(status_code=401, detail="No autenticado")
+    
+    cookie: str = request.cookies["jwt"]
+    cookie = jwt.decode(cookie,SECRET_KEY,algorithms=['HS256'])
+    id_employee = cookie['iss']
+    values = {}
+    values = get_data_report(id_client=id_client,id_employee=id_employee)
+
+    print(values)
+
+    part1 = f'Estimado/a Cliente {values["name_client"]+ " " + values["lastname_client"]}, con cédula número {id_client}. Nos comunicamos de parte de Consorcio Acción para informarle que necesitamos recibir cierta documentación de su parte para poder continuar brindándole nuestros servicios de manera efectiva. Como parte de nuestros procedimientos internos, necesitamos que nos proporcione los siguientes documentos:\n'
+    part2 = f'Es importante destacar que necesitamos recibir los documentos mencionados antes del {str(values["stage_start_date"])} al correo {values["email_employee"]}, de lo contrario, no podremos continuar brindándole nuestros servicios. Por favor, le pedimos que tome nota de esta fecha y que nos envíe los documentos lo antes posible.'
+
     data = [
         "3 Últimos Roles de pago",
         "1 Referencia Personal",
         "1 Referencia Laboral",
         "1 Certificado Bancaria"
     ]
-    
-    part1 = f'Estimado/a Cliente [Nombre y Apellido], con cédula número [Número de Cédula], Nos comunicamos de parte de Consorcio Accion para informarle que necesitamos recibir cierta documentación de su parte para poder continuar brindándole nuestros servicios de manera efectiva. Como parte de nuestros procedimientos internos, necesitamos que nos proporcione los siguientes documentos:\n'
-    part2 = f'Es importante destacar que necesitamos recibir los documentos mencionados antes del [Fecha máxima para la entrega] al corre [correo empleado], de lo contrario, no podremos continuar brindándole nuestros servicios. Por favor, le pedimos que tome nota de esta fecha y que nos envíe los documentos lo antes posible.'
 
     # Generar el archivo PDF
     pdf = PDF()
