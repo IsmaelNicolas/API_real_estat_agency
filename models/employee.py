@@ -19,8 +19,6 @@ class Employee(BaseModel):
             lastname_employee=lastname_employee,
             email_employee=email_employee,
             password_employee=password_employee,
-            position_employee=position_employee,
-            permissions=permissions
         )
         if self.id_employee is None:
             self.id_employee = ""
