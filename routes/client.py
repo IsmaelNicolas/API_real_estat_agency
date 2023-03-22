@@ -50,8 +50,8 @@ async def get_client(id_client:str,request: Request):
             sql = "SELECT CLIENT.ID_CLIENT, CLIENT.NAME_CLIENT, CLIENT.LASTNAME_CLIENT, CLIENT.PHONE_CLIENT ,CLIENT.EMAIL_CLIENT, CLIENT.MARITAL_STATUS_CLIENT, CLIENT.DIRECTION_CLIENT,SUBSCRIBE.DATE_SUBSCRIBE FROM  CLIENT , SUBSCRIBE  WHERE CLIENT.id_client = %s;" 
             cursor.execute(sql,(id_client))
             answer = cursor.fetchone()
-
-            if None in answer.values():
+            print(answer)
+            if answer is None:
                 raise HTTPException(status_code=404, detail="Client not found")
                 
             return response2dict(answer=answer)
