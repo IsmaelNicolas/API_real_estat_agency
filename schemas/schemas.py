@@ -12,9 +12,11 @@ class InsertEmployee(BaseModel):
     lastname_employee: str
     email_employee: str
     password_employee: str
+    position_employee:Optional[str]
 
 class InsertPropertyData(BaseModel):
     emp_id_employee: Optional[str]
+    position_employee:Optional[str]
     id_property: str
     area:str
     neighborhood:str

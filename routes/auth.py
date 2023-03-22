@@ -91,8 +91,8 @@ async def register_user(employee: InsertEmployee):
             if employee.emp_id_employee == '':
                 employee.emp_id_employee= "null"
             print(employee)
-            sql = "INSERT INTO EMPLOYEE (ID_EMPLOYEE, EMP_ID_EMPLOYEE, NAME_EMPLOYEE, LASTNAME_EMPLOYEE, EMAIL_EMPLOYEE, PASSWORD_EMPLOYEE, PERMISSIONS,POSITION_EMPLOYEE) VALUES(uuid(), %s ,%s , %s, %s, %s, 'emp','emp');"
-            cursor.execute(sql,(employee.emp_id_employee,employee.name_employee,employee.lastname_employee,employee.email_employee,employee.password_employee))
+            sql = "INSERT INTO EMPLOYEE (ID_EMPLOYEE, EMP_ID_EMPLOYEE, NAME_EMPLOYEE, LASTNAME_EMPLOYEE, EMAIL_EMPLOYEE, PASSWORD_EMPLOYEE, PERMISSIONS,POSITION_EMPLOYEE) VALUES(uuid(), %s ,%s , %s, %s, %s, 'emp',%s);"
+            cursor.execute(sql,(employee.emp_id_employee,employee.name_employee,employee.lastname_employee,employee.email_employee,employee.password_employee,employee.position_employee))
         conn.commit()
         return employee
     except Exception as e:
