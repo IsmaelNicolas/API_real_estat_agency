@@ -81,8 +81,8 @@ async def insert_data_client(client:InsertEconomicData,request: Request):
         conn.commit()
 
         with conn.cursor() as cursor:
-            sql = "INSERT INTO PAYMENT (ID_CLIENT, ID_PROPERTY, ID_PAYMENT, DESCRIPTION_PAYMENT, DATE_PAYMENT, VALUE_PAYMENT) VALUES (%s, (SELECT ID_PROPERTY FROM property WHERE ID_CLIENT = %s LIMIT 1), uuid(), 'Reservacion', CURRENT_DATE(), %s)"
-            values = (client.id_client,client.id_client,client.payment)
+            sql = "INSERT INTO PAYMENT ( ID_PROPERTY, ID_PAYMENT, DESCRIPTION_PAYMENT, DATE_PAYMENT, VALUE_PAYMENT) VALUES ((SELECT ID_PROPERTY FROM PURCHASE WHERE ID_CLIENT = %s LIMIT 1) , uuid() ,'Reservacion', CURRENT_DATE(), %s)"
+            values = (client.id_client,client.payment)
             cursor.execute(sql,values)
         conn.commit()
         
