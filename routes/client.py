@@ -4,6 +4,7 @@ from config.db import connection,SECRET_KEY
 from utils.Utils import get_cookies,response2dict,addThreeMonths
 from schemas.schemas import InsertClientData,InsertEconomicData,InsertPropertyData
 from models.PDF import PDF
+from models.PDF import ReportStages
 import tempfile
 import jwt
 import os
@@ -63,6 +64,37 @@ async def get_client(id_client:str,request: Request):
 
     except Exception as e:
         raise HTTPException(status_code=409, detail=str(e))
+
+
+@client.get('/api/client/search/{lastname}')
+async def get_client_by_lastname(lastname:str,request: Request):
+
+    conn = connection()
+    try:
+        with conn.cursor() as cursor:
+            if "jwt" not in  request.cookies:
+                raise HTTPException(status_code=401, detail="No autenticado")
+
+            cookie: str = request.cookies["jwt"]
+            cookie = jwt.decode(cookie,SECRET_KEY,algorithms=['HS256'])
+            id_employee = cookie['iss']
+
+            sql = "SELECT c.ID_CLIENT,c.NAME_CLIENT,c.LASTNAME_CLIENT,s.DATE_SUBSCRIBE FROM CLIENT AS c INNER JOIN SUBSCRIBE AS s ON c.ID_CLIENT = s.ID_CLIENT WHERE s.ID_EMPLOYEE = %s AND c.LASTNAME_CLIENT LIKE %s" 
+            cursor.execute(sql, (id_employee, f'%{lastname}%'))
+            answer = cursor.fetchall()
+            
+            if answer is None:
+                raise HTTPException(status_code=404, detail="Client not found")
+                
+            return [response2dict(answer=ans) for ans in answer]
+        
+        
+    except HTTPException as e:
+        raise e
+
+    except Exception as e:
+        raise HTTPException(status_code=409, detail=str(e))
+
 
 @client.put('/api/clients/insert/economiccard')
 async def insert_data_client(client:InsertEconomicData,request: Request):
@@ -321,7 +353,15 @@ def get_stage_report_data(id_client:str):
             if stage == ():
                 raise HTTPException(status_code=404, detail="Stage not foud")
         
-        return response2dict(person) ,[response2dict(answer=ans) for ans in stage], response2dict(payment)
+        with conn.cursor() as cursor:
+            sql =  "SELECT e.EMAIL_EMPLOYEE FROM CLIENT c INNER JOIN SUBSCRIBE s ON c.ID_CLIENT = s.ID_CLIENT INNER JOIN EMPLOYEE e ON e.ID_EMPLOYEE = s.ID_EMPLOYEE WHERE c.ID_CLIENT = %s;"
+            cursor.execute(sql,(id_client))
+            consultant = cursor.fetchone()
+            if stage == ():
+                raise HTTPException(status_code=404, detail="Stage not foud")
+
+
+        return response2dict(person) ,[response2dict(answer=ans) for ans in stage], response2dict(payment),response2dict(consultant)
         
     except HTTPException as e:
         raise e
@@ -331,22 +371,16 @@ def get_stage_report_data(id_client:str):
 @client.get('/api/reportstage/{id_client}')
 async def get_stage_report(id_client:str):
 
-    person,stages,payment = get_stage_report_data(id_client)
-    print(payment)
+    person,stages,payment,consultant = get_stage_report_data(id_client)
+    print(consultant)
 
-    part1 = f'Cliente: {person["name_client"]} {person["lastname_client"]} \nCedula: {person["id_client"]} \nFecha del pago: {payment["date_payment"]} \nCantidad: ${payment["value_payment"]} \n'
+    
 
-    pdf = PDF()
+    pdf = ReportStages()
+    name = person["name_client"] + " "+ person["lastname_client"]
+    pdf.content(name, person["id_client"], str(payment["date_payment"]),str(payment["value_payment"]), consultant["email_employee"],stages)
+    pdf.output('reporte_proyecto.pdf', 'F')
 
-    pdf.set_font('Arial', '',12)
-
-    pdf.multi_cell(0, 10, part1)
-    pdf.cell(0,10,'Etapas')
-    pdf.ln(10)
-    for stage in stages:
-        text = f'{stage["name_stage"]}: \n\tFecha inicio: {stage["stage_start_date"]}, \n\tFecha fin: {stage["stage_end_date"]}'
-        pdf.cell(0,10,text)
-        pdf.ln(10)
 
     # Crear un archivo temporal para almacenar el PDF
     with tempfile.NamedTemporaryFile(delete=False) as f:
