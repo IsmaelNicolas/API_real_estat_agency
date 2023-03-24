@@ -207,7 +207,7 @@ async def get_employees():
     try:
         with conn.cursor() as cursor:
 
-            sql = "SELECT ID_EMPLOYEE, EMP_ID_EMPLOYEE, NAME_EMPLOYEE, LASTNAME_EMPLOYEE FROM EMPLOYEE WHERE POSITION_EMPLOYEE  = 'emp' OR POSITION_EMPLOYEE  = 'jefe' ORDER BY CASE WHEN POSITION_EMPLOYEE  = 'jefe' THEN ID_EMPLOYEE ELSE EMP_ID_EMPLOYEE end;"
+            sql = "SELECT ID_EMPLOYEE, EMP_ID_EMPLOYEE, NAME_EMPLOYEE, LASTNAME_EMPLOYEE FROM EMPLOYEE;"
             cursor.execute(sql,())
             answer = cursor.fetchall()
 
