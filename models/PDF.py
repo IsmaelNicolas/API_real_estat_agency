@@ -58,7 +58,7 @@ class ReportStages(FPDF):
         self.cell(0, 10, cliente, 0, 1)
 
         self.set_font('Arial', 'B', 12)  # cambiar a fuente en negrita
-        self.cell(40, 10, 'Fecha:', 0, 0)
+        self.cell(40, 10, 'Fecha y hora:', 0, 0)
         self.set_font('Arial', '', 12)
         self.cell(-10)
         self.cell(0, 10, str(etapas[0]["stage_end_date"]), 0, 1)
@@ -88,7 +88,7 @@ class ReportStages(FPDF):
         # Imprimir la tabla
         self.set_font('Arial', 'B', 12)
         # Establecer la posición x para centrar la tabla
-        self.set_xy(x, self.y)
+        self.set_xy(self.x, self.y)
         self.cell(col_name_width, row_height, 'Etapa', border=1)
         #self.cell(col_start_width, row_height, 'Fecha inicio', border=1)
         self.cell(col_end_width, row_height, 'Fecha reunión', border=1)
@@ -101,10 +101,11 @@ class ReportStages(FPDF):
 
         primera_etapa = True
 
+        self.ln()
         for etapa in etapas:
             # Imprimir la columna de nombre con color de fondo
             # Establecer la posición x para centrar la tabla
-            self.set_xy(x, self.y)
+            self.set_xy(self.x, self.y)
             self.cell(col_name_width, row_height,
                       etapa['name_stage'], border=1, fill=True)
 
