@@ -2,6 +2,7 @@ from config.db import SECRET_KEY
 import jwt
 import datetime
 import hashlib
+import uuid
 
 def response2dict(answer:dict):
     res = {}
@@ -30,3 +31,10 @@ def addThreeMonths(dateString):
     newDateFormatted = newDate.strftime('%Y-%m-%d %H:%M:%S')
 
     return newDateFormatted
+
+def generar_uuid():
+    uuid_str = str(uuid.uuid1())
+    time_str = uuid_str.split("-")[0]
+    new_uuid = uuid.uuid1(node=uuid.getnode(), clock_seq=uuid.getnode(), time=int(time_str, 16))
+    final_uuid_str = str(new_uuid).replace("-", "")
+    return final_uuid_str
