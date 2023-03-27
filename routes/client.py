@@ -394,5 +394,20 @@ async def get_stage_report(id_client:str):
 
 
 @client.get('/api/notifications/')
-async def get_stage_report(id_client:str):
-    pass
+async def get_stage_report():
+    conn = connection()
+    try:
+        with conn.cursor() as cursor:
+            
+            sql = "SELECT sc.ID_STAGE, st.NAME_STAGE, sc.STAGE_END_DATE, c.ID_CLIENT,c.NAME_CLIENT, c.LASTNAME_CLIENT, e.NAME_EMPLOYEE, e.LASTNAME_EMPLOYEE FROM STAGE_CLIENT sc JOIN SUBSCRIBE s ON sc.ID_CLIENT = s.ID_CLIENT JOIN CLIENT c ON c.ID_CLIENT = s.ID_CLIENT JOIN EMPLOYEE e ON e.ID_EMPLOYEE = s.ID_EMPLOYEE JOIN STAGE st ON st.ID_STAGE = sc.ID_STAGE WHERE CONDITIONS = 0 AND STAGE_END_DATE > NOW() ORDER BY sc.STAGE_START_DATE ASC"
+            cursor.execute(sql)
+            answer = cursor.fetchall()
+            if answer is None:
+                raise HTTPException(status_code=404, detail="Clients not found")
+            
+            return [response2dict(answer=ans) for ans in answer]
+        
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=409,detail={e})
