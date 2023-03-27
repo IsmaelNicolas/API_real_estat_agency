@@ -52,6 +52,8 @@ class ReportStages(FPDF):
             "1 Certificado Bancario"
          ]   
         
+        
+
         part1 = f'Estimado/a cliente {cliente}, con cédula número {cedula}. Nos comunicamos de parte de Consorcio Acción para informarle que necesitamos recibir cierta documentación de su parte para poder continuar brindándole nuestros servicios de manera efectiva. Como parte de nuestros procedimientos internos, necesitamos que nos proporcione los siguientes documentos:\n'
 
         part2 = f'Es importante destacar que necesitamos recibir los documentos mencionados antes del {etapas[0]["stage_end_date"]} al correo {asesor}, de lo contrario, no podremos continuar brindándole nuestros servicios. Por favor, le pedimos que tome nota de esta fecha y que nos envíe los documentos lo antes posible. Adicionalmente, pedimos que tome en consideración las etapas con sus respectivas fechas que se detallan a continuación:'

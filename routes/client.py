@@ -176,7 +176,26 @@ async def get_spouse_data(id_client:str,request:Request):
         raise e
     except Exception as e:
         raise HTTPException(status_code=409,detail={e})
-    
+
+@client.get('/api/property/{id_client}')
+async def get_property_data(id_client:str,request:Request):
+    conn = connection()
+    try:
+        with conn.cursor() as cursor:
+            sql = "SELECT pr.ID_PROPERTY ,pr.AREA ,pr.URBANIZATION ,pr.NEIGHBORHOOD  from PURCHASE p , PROPERTY pr,CLIENT c WHERE  p.ID_PROPERTY =pr.ID_PROPERTY AND c.ID_CLIENT = p.ID_CLIENT AND p.ID_CLIENT =  %s;"
+            cursor.execute(sql,(id_client))
+            answer = cursor.fetchone()
+            if answer is None:
+                raise HTTPException(status_code=404, detail="Property not found")
+            if None in answer.values():
+                raise HTTPException(status_code=404, detail="Property not found")
+            return response2dict(answer=answer)
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=409,detail={e})
+
+
 @client.get('/api/stage/{id_client}')
 async def get_stage_data(id_client:str,request:Request):
     conn = connection()
@@ -369,7 +388,6 @@ async def get_stage_report(id_client:str):
     person,stages,payment,consultant = get_stage_report_data(id_client)
     print(consultant)
 
-    
 
     pdf = ReportStages()
     name = person["name_client"] + " "+ person["lastname_client"]
@@ -391,7 +409,6 @@ async def get_stage_report(id_client:str):
     response = Response(content=content, media_type='application/pdf')
     response.headers['Content-Disposition'] = f'attachment; filename= etapas.pdf'
     return response
-
 
 @client.get('/api/notifications/')
 async def get_stage_report():
