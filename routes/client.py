@@ -359,22 +359,16 @@ def get_stage_report_data(id_client:str):
             if stage == ():
                 raise HTTPException(status_code=404, detail="Stage not foud")
             
-        with conn.cursor() as cursor:
-            sql =  "SELECT p.DATE_PAYMENT ,p.VALUE_PAYMENT  from PAYMENT as p, PURCHASE as pu where p.ID_PROPERTY = pu.ID_PROPERTY and pu.ID_CLIENT = %s"
-            cursor.execute(sql,(id_client))
-            payment = cursor.fetchone()
-            if stage == ():
-                raise HTTPException(status_code=404, detail="Stage not foud")
         
         with conn.cursor() as cursor:
-            sql =  "SELECT e.EMAIL_EMPLOYEE FROM CLIENT c INNER JOIN SUBSCRIBE s ON c.ID_CLIENT = s.ID_CLIENT INNER JOIN EMPLOYEE e ON e.ID_EMPLOYEE = s.ID_EMPLOYEE WHERE c.ID_CLIENT = %s;"
+            sql =  "SELECT e.EMAIL_EMPLOYEE  from CLIENT c ,EMPLOYEE e , SUBSCRIBE s WHERE c.ID_CLIENT = s.ID_CLIENT AND e.ID_EMPLOYEE =s.ID_EMPLOYEE AND s.ID_CLIENT = %s;"
             cursor.execute(sql,(id_client))
             consultant = cursor.fetchone()
             if stage == ():
                 raise HTTPException(status_code=404, detail="Stage not foud")
 
 
-        return response2dict(person) ,[response2dict(answer=ans) for ans in stage], response2dict(payment),response2dict(consultant)
+        return response2dict(person) ,[response2dict(answer=ans) for ans in stage],response2dict(consultant)
         
     except HTTPException as e:
         raise e
@@ -384,13 +378,13 @@ def get_stage_report_data(id_client:str):
 @client.get('/api/reportstage/{id_client}')
 async def get_stage_report(id_client:str):
 
-    person,stages,payment,consultant = get_stage_report_data(id_client)
-    print(consultant)
+    person,stages,consultant = get_stage_report_data(id_client)
+    print(person)
 
 
     pdf = ReportStages()
     name = person["name_client"] + " "+ person["lastname_client"]
-    pdf.content(name, person["id_client"], str(payment["date_payment"]),str(payment["value_payment"]), consultant["email_employee"],stages)
+    pdf.content(name, person["id_client"], consultant["email_employee"],stages)
     pdf.output('reporte_proyecto.pdf', 'F')
 
 
