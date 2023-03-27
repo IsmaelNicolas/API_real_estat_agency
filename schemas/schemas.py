@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
+from typing import List, Dict, Optional
 
 class LoginData(BaseModel):
     email_employee: str
@@ -60,6 +61,8 @@ class InsertEconomicData(BaseModel):
     entity_direction: str
     id_property: str
     payment: str
+    features: List[Dict[str, str]] = []
+
 
 class UpdateStage(BaseModel):
     id_client:str
