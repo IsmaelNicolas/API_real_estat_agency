@@ -79,7 +79,7 @@ async def get_client_by_lastname(lastname:str,request: Request):
             cookie = jwt.decode(cookie,SECRET_KEY,algorithms=['HS256'])
             id_employee = cookie['iss']
 
-            sql = "SELECT c.ID_CLIENT,c.NAME_CLIENT,c.LASTNAME_CLIENT,s.DATE_SUBSCRIBE FROM CLIENT AS c INNER JOIN SUBSCRIBE AS s ON c.ID_CLIENT = s.ID_CLIENT WHERE  AND c.LASTNAME_CLIENT LIKE %s" 
+            sql = "SELECT c.ID_CLIENT,c.NAME_CLIENT,c.LASTNAME_CLIENT,s.DATE_SUBSCRIBE FROM CLIENT AS c INNER JOIN SUBSCRIBE AS s ON c.ID_CLIENT = s.ID_CLIENT WHERE  c.LASTNAME_CLIENT LIKE %s" 
             cursor.execute(sql, ( f'%{lastname}%'))
             answer = cursor.fetchall()
             
