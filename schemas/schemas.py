@@ -61,3 +61,6 @@ class InsertEconomicData(BaseModel):
     id_property: str
     payment: str
 
+class UpdateStage(BaseModel):
+    id_client:str
+    id_stage:str

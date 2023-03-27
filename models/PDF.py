@@ -52,7 +52,9 @@ class ReportStages(FPDF):
             "1 Certificado Bancario"
          ]   
         
-        
+        self.set_font('Arial', 'B', 12)
+        self.cell(0,10,"Cliente:", cliente)
+        self.set_font('Arial', '', 12)
 
         part1 = f'Estimado/a cliente {cliente}, con cédula número {cedula}. Nos comunicamos de parte de Consorcio Acción para informarle que necesitamos recibir cierta documentación de su parte para poder continuar brindándole nuestros servicios de manera efectiva. Como parte de nuestros procedimientos internos, necesitamos que nos proporcione los siguientes documentos:\n'
 

@@ -2,7 +2,7 @@ from io import BytesIO
 from fastapi import APIRouter, HTTPException,  Request,Response
 from config.db import connection,SECRET_KEY
 from utils.Utils import get_cookies,response2dict,addThreeMonths
-from schemas.schemas import InsertClientData,InsertEconomicData,InsertPropertyData
+from schemas.schemas import InsertClientData,InsertEconomicData,InsertPropertyData,UpdateStage
 from models.PDF import PDF
 from models.PDF import ReportStages
 import tempfile
@@ -194,7 +194,6 @@ async def get_property_data(id_client:str,request:Request):
         raise e
     except Exception as e:
         raise HTTPException(status_code=409,detail={e})
-
 
 @client.get('/api/stage/{id_client}')
 async def get_stage_data(id_client:str,request:Request):
@@ -424,6 +423,22 @@ async def get_stage_report():
             
             return [response2dict(answer=ans) for ans in answer]
         
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=409,detail={e})
+    
+@client.put('/api/update/stage')
+async def insert_data_client(stage:UpdateStage):
+    print(client)
+    try:
+        conn = connection()
+        with conn.cursor() as cursor:
+            sql = "UPDATE STAGE_CLIENT SET  CONDITIONS=1 WHERE ID_CLIENT=%s AND ID_STAGE=%s;"
+            values = (stage.id_client,stage.id_stage)
+            cursor.execute(sql,values)
+        conn.commit()
+        return stage
     except HTTPException as e:
         raise e
     except Exception as e:
