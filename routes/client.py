@@ -399,10 +399,9 @@ async def get_stage_report():
     try:
         with conn.cursor() as cursor:
             
-            sql = "SELECT sc.ID_STAGE, st.NAME_STAGE, sc.STAGE_END_DATE, c.ID_CLIENT,c.NAME_CLIENT, c.LASTNAME_CLIENT, e.NAME_EMPLOYEE, e.LASTNAME_EMPLOYEE, sc.CONDITIOS FROM STAGE_CLIENT sc JOIN SUBSCRIBE s ON sc.ID_CLIENT = s.ID_CLIENT JOIN CLIENT c ON c.ID_CLIENT = s.ID_CLIENT JOIN EMPLOYEE e ON e.ID_EMPLOYEE = s.ID_EMPLOYEE JOIN STAGE st ON st.ID_STAGE = sc.ID_STAGE WHERE CONDITIONS = 0 AND STAGE_END_DATE > NOW() ORDER BY sc.STAGE_START_DATE ASC LIMIT 10"
+            sql = "SELECT sc.ID_STAGE, st.NAME_STAGE, sc.STAGE_END_DATE, c.ID_CLIENT,c.NAME_CLIENT, c.LASTNAME_CLIENT, e.NAME_EMPLOYEE, e.LASTNAME_EMPLOYEE, sc.CONDITIONS FROM STAGE_CLIENT sc JOIN SUBSCRIBE s ON sc.ID_CLIENT = s.ID_CLIENT JOIN CLIENT c ON c.ID_CLIENT = s.ID_CLIENT JOIN EMPLOYEE e ON e.ID_EMPLOYEE = s.ID_EMPLOYEE JOIN STAGE st ON st.ID_STAGE = sc.ID_STAGE WHERE CONDITIONS = 0 AND STAGE_END_DATE > NOW() ORDER BY sc.STAGE_START_DATE ASC LIMIT 10"
             cursor.execute(sql)
             answer = cursor.fetchall()
-            print(answer)
             if answer is None:
                 raise HTTPException(status_code=404, detail="Clients not found")
             
