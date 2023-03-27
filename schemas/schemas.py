@@ -26,6 +26,7 @@ class InsertPropertyData(BaseModel):
 
 class InsertClientData(BaseModel):
     id_client: str
+    id_employee: str
     name_client: str
     lastname_client: str
     email_client: str
@@ -47,15 +48,16 @@ class ReturnClientData(BaseModel):
 
 class InsertEconomicData(BaseModel):
     id_client: Optional[str]
+    date_reunion: str
     spouse_lastname: str
     spouse_ocupation: str
     spouse_direction: str
-    spouse_salary: float
+    spouse_salary: str
     spouse_entity: str
     client_ocupation: str
-    client_salary: float
+    client_salary: str
     client_entity: str
     entity_direction: str
     id_property: str
-    payment: float
+    payment: str
 

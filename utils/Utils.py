@@ -17,14 +17,16 @@ def get_cookies(request):
     cookie = jwt.decode(cookie,SECRET_KEY,algorithms=['HS256'])
     return cookie['iss']
 
-def addThreeMonths(*dateString):
-    if len(dateString) > 0:
-        try:
-            inputDate = datetime.datetime.strptime(dateString[0], "%Y/%m/%d")
-        except ValueError:
-            return "Invalid date format. Use YYYY/MM/DD."
-    else:
-        inputDate = datetime.datetime.now()
+def addThreeMonths(dateString):
+    try:
+        inputDate = datetime.datetime.strptime(dateString, "%Y-%m-%d %H:%M:%S")
+    except ValueError:
+        return "Invalid date format. Use YYYY-MM-DD HH:MM:SS."
 
+    # Agregamos los tres meses
     newDate = inputDate + datetime.timedelta(days=3*30)
-    return newDate.strftime("%Y/%m/%d")
+
+    # Convertimos la fecha resultante de vuelta al formato 'YYYY-MM-DD HH:MM:SS'
+    newDateFormatted = newDate.strftime('%Y-%m-%d %H:%M:%S')
+
+    return newDateFormatted

@@ -6,6 +6,7 @@ from schemas.schemas import InsertClientData,InsertEconomicData,InsertPropertyDa
 from models.PDF import PDF
 from models.PDF import ReportStages
 import tempfile
+import datetime as dt
 import jwt
 import os
 
@@ -25,9 +26,9 @@ async def insert_client(client: InsertClientData,request: Request):
 
         with conn.cursor() as cursor:
 
-            id_employee = get_cookies(request)
+            
             sql = "INSERT INTO SUBSCRIBE (ID_EMPLOYEE, ID_CLIENT, DATE_SUBSCRIBE, CITY_SUBSCRIBE) VALUES (%s, %s, current_date(), %s)"
-            values = (id_employee,client.id_client,client.city_subscribe)
+            values = (client.id_employee,client.id_client,client.city_subscribe)
             cursor.execute(sql,values)
             conn.commit()
 
@@ -65,7 +66,6 @@ async def get_client(id_client:str,request: Request):
     except Exception as e:
         raise HTTPException(status_code=409, detail=str(e))
 
-
 @client.get('/api/client/search/{lastname}')
 async def get_client_by_lastname(lastname:str,request: Request):
 
@@ -95,10 +95,9 @@ async def get_client_by_lastname(lastname:str,request: Request):
     except Exception as e:
         raise HTTPException(status_code=409, detail=str(e))
 
-
 @client.put('/api/clients/insert/economiccard')
 async def insert_data_client(client:InsertEconomicData,request: Request):
-    
+    print(client)
     try:
         conn = connection()
         with conn.cursor() as cursor:
@@ -108,25 +107,21 @@ async def insert_data_client(client:InsertEconomicData,request: Request):
         conn.commit()
 
         with conn.cursor() as cursor:
-            sql = "INSERT INTO PURCHASE (ID_CLIENT, ID_PROPERTY) VALUES(%s, %s);"
-            values = (client.id_client,client.id_property)
+            sql = "INSERT INTO PURCHASE (ID_CLIENT, ID_PROPERTY,PAYMENT_VALUE,PAYMENT_DATE) VALUES(%s, %s,%s,CURRENT_DATE());"
+            values = (client.id_client,client.id_property,client.payment)
             cursor.execute(sql,values)
         conn.commit()
 
-        with conn.cursor() as cursor:
-            sql = "INSERT INTO PAYMENT ( ID_PROPERTY, ID_PAYMENT, DESCRIPTION_PAYMENT, DATE_PAYMENT, VALUE_PAYMENT) VALUES ((SELECT ID_PROPERTY FROM PURCHASE WHERE ID_CLIENT = %s LIMIT 1) , uuid() ,'Reservacion', CURRENT_DATE(), %s)"
-            values = (client.id_client,client.payment)
-            cursor.execute(sql,values)
-        conn.commit()
         
-        
-        dates = [None] * 7
+        fecha_hora_str = client.date_reunion
+        fecha_hora = dt.datetime.strptime(fecha_hora_str, "%Y-%m-%dT%H:%M")
+        fecha_hora_formatted = fecha_hora.strftime('%Y-%m-%d %H:%M:%S')
 
-        for i in range(7):
-            if i == 0:
-                dates[i] = addThreeMonths()
-            else:
-                dates[i] = addThreeMonths(dates[i-1])
+        dates = [fecha_hora_formatted]
+
+        for i in range(8):
+            if i != 0:
+                dates.append(addThreeMonths(dates[i-1]))
 
         
         for i in range(len(dates)-1):
@@ -207,7 +202,7 @@ async def get_employees():
     try:
         with conn.cursor() as cursor:
 
-            sql = "SELECT ID_EMPLOYEE, EMP_ID_EMPLOYEE, NAME_EMPLOYEE, LASTNAME_EMPLOYEE FROM EMPLOYEE;"
+            sql = "SELECT ID_EMPLOYEE, EMP_ID_EMPLOYEE, NAME_EMPLOYEE, LASTNAME_EMPLOYEE FROM EMPLOYEE WHERE PERMISSIONS != 'admin'"
             cursor.execute(sql,())
             answer = cursor.fetchall()
 
@@ -396,3 +391,8 @@ async def get_stage_report(id_client:str):
     response = Response(content=content, media_type='application/pdf')
     response.headers['Content-Disposition'] = f'attachment; filename= etapas.pdf'
     return response
+
+
+@client.get('/api/notifications/')
+async def get_stage_report(id_client:str):
+    pass
