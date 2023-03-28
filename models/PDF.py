@@ -84,55 +84,52 @@ class ReportStages(FPDF):
         # Calcular la posición x para centrar la tabla en la página
         page_width = self.w
         table_width = col_name_width + col_end_width + col_duration_width
-        x = (page_width - table_width) / 4
+        x = (page_width - table_width) / 2
         # Imprimir la tabla
-        self.set_font('Arial', 'B', 12)
+        self.set_font('Arial', 'BI', 12)
         # Establecer la posición x para centrar la tabla
         self.set_xy(self.x, self.y)
-        self.cell(col_name_width, row_height, 'Etapa', border=0)
+        self.cell(col_name_width, row_height, 'Etapa', border='B')
         #self.cell(col_start_width, row_height, 'Fecha inicio', border=1)
-        self.cell(col_end_width, row_height, 'Fecha reunión', border=0)
-        self.cell(col_duration_width, row_height, 'Asistencia', border=0)
+        self.cell(col_end_width, row_height, 'Fecha reunión', border='B')
+        self.cell(col_duration_width, row_height, 'Asistencia', border='B')
         # self.cell(col_duration_width, row_height, 'Duración', border=1)
         self.set_font('Arial', '', 12)
 
         # Establecer el color de fondo
-        r,g,b = 248,210,173
+        r,g,b = 249,229,213
         step = 1 / 6
 
-         # Tomate pálido
 
         primera_etapa = True
 
         self.ln()
         for etapa in etapas:
-            # Imprimir la columna de nombre con color de fondo
-            # Establecer la posición x para centrar la tabla
             self.set_fill_color(r,g,b)
             self.set_xy(self.x, self.y)
-            self.cell(col_name_width, row_height,
-                      etapa['name_stage'], border=0, fill=True)
-
-            # Imprimir la columna de fecha de inicio
-            #self.cell(col_start_width, row_height, str(
-            #    etapa['stage_start_date']), border=1, fill=True)
-
-            # Imprimir la columna de fecha de fin
-            self.cell(col_end_width, row_height, str(
-                etapa['stage_end_date']).split()[0], border=0, fill=True)
-
             if primera_etapa:
+
+                self.cell(col_name_width, row_height,etapa['name_stage'], border='T', fill=True)
+
+                self.cell(col_end_width, row_height, str(etapa['stage_end_date']).split()[0], border='T', fill=True)
+
                 self.cell(col_duration_width, row_height,
-                          "Email", border=0, fill=True)
+                          "Email", border='T', fill=True)
+                
                 primera_etapa = False
             else:
-                self.cell(col_duration_width, row_height,
-                          "Presencial", border=0, fill=True)
+
+                self.cell(col_name_width, row_height,etapa['name_stage'], border=0, fill=True)
+
+                self.cell(col_end_width, row_height, str( etapa['stage_end_date']).split()[0], border=0, fill=True)
+
+                self.cell(col_duration_width, row_height,"Presencial", border=0, fill=True)
+
             self.ln()
 
-            r -= round(9 * step)
-            g -= round(77 * step)
-            b -= round(135 * step)
+            r -= round(30 * step)
+            g -= round(158 * step)
+            b -= round(209 * step)
             
         self.set_font('Arial', '', 12)
 
