@@ -413,13 +413,33 @@ async def get_stage_report(id_client: str):
 
 
 @client.get('/api/notifications/')
-async def get_stage_report():
+async def get_stage_report(request:Request):
     conn = connection()
     try:
+
+        if "jwt" not in  request.cookies:
+            print("No hay cookie")
+            raise HTTPException(status_code=401, detail="No autenticado")
+            
+        cookie: str = request.cookies["jwt"]
+        cookie = jwt.decode(cookie,SECRET_KEY,algorithms=['HS256'])
+        id_employee = cookie['iss']
+
+        with conn.cursor() as cursor:
+            sql = "SELECT * FROM EMPLOYEE WHERE id_employee = %s;"
+            cursor.execute(sql,(id_employee))
+            answer = cursor.fetchone()
+       
+
         with conn.cursor() as cursor:
 
-            sql = "SELECT sc.ID_STAGE, st.NAME_STAGE, sc.STAGE_END_DATE, c.ID_CLIENT,c.NAME_CLIENT, c.LASTNAME_CLIENT, e.NAME_EMPLOYEE, e.LASTNAME_EMPLOYEE, sc.CONDITIONS FROM STAGE_CLIENT sc JOIN SUBSCRIBE s ON sc.ID_CLIENT = s.ID_CLIENT JOIN CLIENT c ON c.ID_CLIENT = s.ID_CLIENT JOIN EMPLOYEE e ON e.ID_EMPLOYEE = s.ID_EMPLOYEE JOIN STAGE st ON st.ID_STAGE = sc.ID_STAGE WHERE CONDITIONS = 0 AND STAGE_END_DATE > NOW() ORDER BY sc.STAGE_START_DATE ASC LIMIT 10"
-            cursor.execute(sql)
+            if(answer["POSITION_EMPLOYEE"] == "Secretaria"):
+                sql = "SELECT sc.ID_STAGE, st.NAME_STAGE, sc.STAGE_END_DATE, c.ID_CLIENT,c.NAME_CLIENT, c.LASTNAME_CLIENT, e.NAME_EMPLOYEE, e.LASTNAME_EMPLOYEE, sc.CONDITIONS FROM STAGE_CLIENT sc JOIN SUBSCRIBE s ON sc.ID_CLIENT = s.ID_CLIENT JOIN CLIENT c ON c.ID_CLIENT = s.ID_CLIENT JOIN EMPLOYEE e ON e.ID_EMPLOYEE = s.ID_EMPLOYEE JOIN STAGE st ON st.ID_STAGE = sc.ID_STAGE WHERE CONDITIONS = 0 AND STAGE_END_DATE > NOW() ORDER BY sc.STAGE_START_DATE ASC LIMIT 10"
+                cursor.execute(sql)
+            else:
+                sql = "SELECT sc.ID_STAGE, st.NAME_STAGE, sc.STAGE_END_DATE, c.ID_CLIENT,c.NAME_CLIENT, c.LASTNAME_CLIENT, e.NAME_EMPLOYEE, e.LASTNAME_EMPLOYEE, sc.CONDITIONS FROM STAGE_CLIENT sc JOIN SUBSCRIBE s ON sc.ID_CLIENT = s.ID_CLIENT JOIN CLIENT c ON c.ID_CLIENT = s.ID_CLIENT JOIN EMPLOYEE e ON e.ID_EMPLOYEE = s.ID_EMPLOYEE JOIN STAGE st ON st.ID_STAGE = sc.ID_STAGE WHERE CONDITIONS = 0 AND STAGE_END_DATE > NOW() AND e.ID_EMPLOYEE = %s  ORDER BY sc.STAGE_START_DATE ASC LIMIT 10"
+                cursor.execute(sql,(id_employee))
+
             answer = cursor.fetchall()
             if answer is None:
                 raise HTTPException(
