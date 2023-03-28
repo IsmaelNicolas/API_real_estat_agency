@@ -267,6 +267,28 @@ async def get_employees():
     except Exception as e:
         raise HTTPException(status_code=409, detail=str(e))
 
+@client.get('/api/employes')
+async def get_employees():
+
+    conn = connection()
+    try:
+        with conn.cursor() as cursor:
+
+            sql = "SELECT ID_EMPLOYEE, EMP_ID_EMPLOYEE, NAME_EMPLOYEE, LASTNAME_EMPLOYEE FROM EMPLOYEE WHERE PERMISSIONS == 'admin'"
+            cursor.execute(sql, ())
+            answer = cursor.fetchall()
+
+            if answer is None:
+                raise HTTPException(status_code=404, detail="Client not found")
+
+            return [response2dict(answer=el) for el in answer]
+
+    except HTTPException as e:
+        raise e
+
+    except Exception as e:
+        raise HTTPException(status_code=409, detail=str(e))
+
 
 def get_data_report(id_client: str, id_employee: str):
     conn = connection()
