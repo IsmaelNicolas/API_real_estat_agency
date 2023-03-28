@@ -404,7 +404,7 @@ async def get_stage_report(id_client: str):
     with open(filename, mode='rb') as f:
         content = f.read()
 
-    os.unlink(filename)  # Eliminar el archivo temporal
+    os.unlink(filename)  
 
     response = Response(content=content, media_type='application/pdf')
     response.headers['Content-Disposition'] = f'attachment; filename= etapas.pdf'
