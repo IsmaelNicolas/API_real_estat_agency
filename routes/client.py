@@ -313,60 +313,6 @@ async def get_employees():
         raise HTTPException(status_code=409, detail=str(e))
 
 
-@client.get('/api/report/{id_client}')
-async def get_report_PDF(id_client: str, request: Request):
-
-    if "jwt" not in request.cookies:
-        print("No hay cookie")
-        raise HTTPException(status_code=401, detail="No autenticado")
-
-    cookie: str = request.cookies["jwt"]
-    cookie = jwt.decode(cookie, SECRET_KEY, algorithms=['HS256'])
-    id_employee = cookie['iss']
-    values = {}
-    values = get_data_report(id_client=id_client, id_employee=id_employee)
-
-    print(values["name_client"] + " " + values["lastname_client"] +
-          " " + str(values["stage_start_date"]))
-
-    part1 = f'Estimado/a Cliente {values["name_client"]+ " " + values["lastname_client"]}, con cédula número {id_client}. Nos comunicamos de parte de Consorcio Acción para informarle que necesitamos recibir cierta documentación de su parte para poder continuar brindándole nuestros servicios de manera efectiva. Como parte de nuestros procedimientos internos, necesitamos que nos proporcione los siguientes documentos:\n'
-    part2 = f'Es importante destacar que necesitamos recibir los documentos mencionados antes del {str(values["stage_start_date"])} al correo {values["email_employee"]}, de lo contrario, no podremos continuar brindándole nuestros servicios. Por favor, le pedimos que tome nota de esta fecha y que nos envíe los documentos lo antes posible.'
-
-    data = [
-        "3 Últimos Roles de pago",
-        "1 Referencia Personal",
-        "1 Referencia Laboral",
-        "1 Certificado Bancaria"
-    ]
-
-    # Generar el archivo PDF
-    pdf = PDF()
-
-    pdf.set_font('Arial', '', 12)
-    pdf.multi_cell(0, 10, part1)
-
-    pdf.content(data=data)
-
-    pdf.set_font('Arial', '', 12)
-    pdf.multi_cell(0, 10, part2)
-
-    # Crear un archivo temporal para almacenar el PDF
-    with tempfile.NamedTemporaryFile(delete=False) as f:
-        pdf.output(f.name)
-        filename = f.name
-
-    # Leer el archivo temporal y devolver su contenido como respuesta HTTP
-    with open(filename, mode='rb') as f:
-        content = f.read()
-
-    os.unlink(filename)  # Eliminar el archivo temporal
-
-    response = Response(content=content, media_type='application/pdf')
-    response.headers[
-        'Content-Disposition'] = f'attachment; filename={values["name_client"]+ " " + values["lastname_client"] + " " + str(values["stage_start_date"])}.pdf'
-    return response
-
-
 @client.get('/api/properties')
 async def get_properties(request: Request):
     conn = connection()
