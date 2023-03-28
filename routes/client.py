@@ -388,12 +388,11 @@ def get_stage_report_data(id_client: str):
 async def get_stage_report(id_client: str):
 
     person, stages, consultant = get_stage_report_data(id_client)
-    print(person)
 
     pdf = ReportStages()
     name = person["name_client"] + " " + person["lastname_client"]
-    pdf.content(name, person["id_client"],
-                consultant["email_employee"], stages)
+    #pdf.content(name, person["id_client"],consultant["email_employee"], stages)
+    pdf.content(name, person["id_client"],"kledesma@consorcioaccion.com", stages)
     pdf.output('reporte_proyecto.pdf', 'F')
 
     # Crear un archivo temporal para almacenar el PDF
@@ -429,7 +428,6 @@ async def get_stage_report(request:Request):
             sql = "SELECT * FROM EMPLOYEE WHERE id_employee = %s;"
             cursor.execute(sql,(id_employee))
             answer = cursor.fetchone()
-       
 
         with conn.cursor() as cursor:
 

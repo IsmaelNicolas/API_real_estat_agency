@@ -7,12 +7,11 @@ class PDF(FPDF):
         self.add_page()
 
     def header(self):
-        # Define el encabezado del documento
-        self.image('static/logo.png', x=10, y=10, w=25)
-        self.set_font('Arial', 'B', 15)
+    # Define el encabezado del documento
+        self.w_image('static/logo.png', x=self.w/2-12.5, y=10, w=25)
         self.cell(80)
-        self.cell(30, 10, 'Consorcio Accion', 0, 0, 'C')
         self.ln(20)
+
 
     def content(self, data):
         # Define el contenido del documento
@@ -29,12 +28,13 @@ class ReportStages(FPDF):
         self.add_page()
 
     def header(self):
-        # Define el encabezado del documento
-        self.image('static/logo.png', x=10, y=10, w=35)
-        self.set_font('Arial', 'B', 18)
-        self.cell(80)
-        self.cell(30, 10, 'Consorcio Accion', 0, 0, 'C')
+    # Define el encabezado del documento
+        width= self.w
+        image_width = 35
+        x = (width - image_width) / 2
+        self.image('static/logo.png', x=x, y=10, w=image_width )
         self.ln(30)
+
 
 
     def content(self, cliente, cedula, asesor, etapas):
@@ -58,10 +58,10 @@ class ReportStages(FPDF):
         self.cell(0, 10, cliente, 0, 1)
 
         self.set_font('Arial', 'B', 12)  # cambiar a fuente en negrita
-        self.cell(40, 10, 'Fecha y hora:', 0, 0)
+        self.cell(40, 10, 'Hora:', 0, 0)
         self.set_font('Arial', '', 12)
         self.cell(-10)
-        self.cell(0, 10, str(etapas[0]["stage_end_date"]), 0, 1)
+        self.cell(0, 10, str(etapas[0]["stage_end_date"]).split()[1], 0, 1)
         # part1 = f'Estimado/a cliente {cliente}, con cédula número {cedula}. Nos comunicamos de parte de Consorcio Acción para informarle que necesitamos recibir cierta documentación de su parte para poder continuar brindándole nuestros servicios de manera efectiva. Como parte de nuestros procedimientos internos, necesitamos que nos proporcione los siguientes documentos:\n'
         self.ln()
 
@@ -89,15 +89,18 @@ class ReportStages(FPDF):
         self.set_font('Arial', 'B', 12)
         # Establecer la posición x para centrar la tabla
         self.set_xy(self.x, self.y)
-        self.cell(col_name_width, row_height, 'Etapa', border=1)
+        self.cell(col_name_width, row_height, 'Etapa', border=0)
         #self.cell(col_start_width, row_height, 'Fecha inicio', border=1)
-        self.cell(col_end_width, row_height, 'Fecha reunión', border=1)
-        self.cell(col_duration_width, row_height, 'Asistencia', border=1)
+        self.cell(col_end_width, row_height, 'Fecha reunión', border=0)
+        self.cell(col_duration_width, row_height, 'Asistencia', border=0)
         # self.cell(col_duration_width, row_height, 'Duración', border=1)
         self.set_font('Arial', '', 12)
 
         # Establecer el color de fondo
-        self.set_fill_color(255, 222, 173)  # Tomate pálido
+        r,g,b = 248,210,173
+        step = 1 / 6
+
+         # Tomate pálido
 
         primera_etapa = True
 
@@ -105,9 +108,10 @@ class ReportStages(FPDF):
         for etapa in etapas:
             # Imprimir la columna de nombre con color de fondo
             # Establecer la posición x para centrar la tabla
+            self.set_fill_color(r,g,b)
             self.set_xy(self.x, self.y)
             self.cell(col_name_width, row_height,
-                      etapa['name_stage'], border=1, fill=True)
+                      etapa['name_stage'], border=0, fill=True)
 
             # Imprimir la columna de fecha de inicio
             #self.cell(col_start_width, row_height, str(
@@ -115,17 +119,21 @@ class ReportStages(FPDF):
 
             # Imprimir la columna de fecha de fin
             self.cell(col_end_width, row_height, str(
-                etapa['stage_end_date']), border=1, fill=True)
+                etapa['stage_end_date']).split()[0], border=0, fill=True)
 
             if primera_etapa:
                 self.cell(col_duration_width, row_height,
-                          "Email", border=1, fill=True)
+                          "Email", border=0, fill=True)
                 primera_etapa = False
             else:
                 self.cell(col_duration_width, row_height,
-                          "Presencial", border=1, fill=True)
+                          "Presencial", border=0, fill=True)
             self.ln()
 
+            r -= round(9 * step)
+            g -= round(77 * step)
+            b -= round(135 * step)
+            
         self.set_font('Arial', '', 12)
 
         self.ln()
@@ -139,6 +147,7 @@ class ReportStages(FPDF):
             self.ln(10)
 
         self.multi_cell(0, 10, part3)
+
 
     def footer(self):
         # Definir posición x e y
