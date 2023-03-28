@@ -290,6 +290,29 @@ async def get_employees():
         raise HTTPException(status_code=409, detail=str(e))
 
 
+@client.get('/api/employees/admin')
+async def get_employees():
+
+    conn = connection()
+    try:
+        with conn.cursor() as cursor:
+
+            sql = "SELECT ID_EMPLOYEE, EMP_ID_EMPLOYEE, NAME_EMPLOYEE, LASTNAME_EMPLOYEE FROM EMPLOYEE WHERE PERMISSIONS != 'admin'"
+            cursor.execute(sql, ())
+            answer = cursor.fetchall()
+
+            if answer is None:
+                raise HTTPException(status_code=404, detail="Client not found")
+
+            return [response2dict(answer=el) for el in answer]
+
+    except HTTPException as e:
+        raise e
+
+    except Exception as e:
+        raise HTTPException(status_code=409, detail=str(e))
+
+
 @client.get('/api/report/{id_client}')
 async def get_report_PDF(id_client: str, request: Request):
 
@@ -384,7 +407,6 @@ async def insert_property(property: InsertPropertyData):
     finally:
         conn.close()
 
-
 def get_stage_report_data(id_client: str):
     conn = connection()
     try:
@@ -415,7 +437,6 @@ def get_stage_report_data(id_client: str):
         raise e
     except Exception as e:
         raise HTTPException(status_code=409, detail={e})
-
 
 @client.get('/api/reportstage/{id_client}')
 async def get_stage_report(id_client: str):
