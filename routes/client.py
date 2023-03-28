@@ -489,6 +489,12 @@ async def reschedule_stages(data: UpdateStage):
             meses += 3
             conn.commit()
 
+        for i in range(int(data.id_stage), 7):
+            with conn.cursor() as cursor:
+                sql = "UPDATE STAGE_CLIENT SET STAGE_START_DATE = ( SELECT sub.STAGE_END_DATE from(	SELECT STAGE_END_DATE from STAGE_CLIENT			WHERE ID_STAGE = %s AND ID_CLIENT = %s) sub)  WHERE ID_STAGE = %s AND ID_CLIENT = %s"
+                values = (i,data.id_client,i+1,data.id_client)
+                cursor.execute(sql, values)
+            conn.commit()
 
     except HTTPException as e:
         raise e
