@@ -1,7 +1,7 @@
 from io import BytesIO
 from fastapi import APIRouter, HTTPException,  Request, Response
 from config.db import connection, SECRET_KEY
-from utils.Utils import get_cookies, response2dict, addThreeMonths,generar_uuid
+from utils.Utils import get_cookies, response2dict, addThreeMonths, generar_uuid, sumar_fechas
 from schemas.schemas import InsertClientData, InsertEconomicData, InsertPropertyData, UpdateStage
 from models.PDF import PDF
 from models.PDF import ReportStages
@@ -100,9 +100,9 @@ async def get_client_by_lastname(lastname: str, request: Request):
 
 @client.put('/api/clients/insert/economiccard')
 async def insert_data_client(client: InsertEconomicData, request: Request):
-    #print(client)
+    # print(client)
     dic = {"finishes": "Acabados", "property_type": "Tipo de propiedad",
-               "floors": "Pisos",  "value":"Costos", "construction":"Contruccion m2", "terrain": "Terreno m2"}
+           "floors": "Pisos",  "value": "Costos", "construction": "Contruccion m2", "terrain": "Terreno m2"}
     try:
         conn = connection()
         with conn.cursor() as cursor:
@@ -111,8 +111,6 @@ async def insert_data_client(client: InsertEconomicData, request: Request):
                       client.client_ocupation, client.client_salary, client.client_entity, client.entity_direction, client.id_client)
             cursor.execute(sql, values)
         conn.commit()
-
-        
 
         with conn.cursor() as cursor:
             sql = "INSERT INTO BUY (ID_CLIENT, ID_TERRAIN, PAYMENT_DATE, PAYMENT_VALUE) VALUES(%s, %s, CURRENT_DATE() , %s);"
@@ -125,7 +123,7 @@ async def insert_data_client(client: InsertEconomicData, request: Request):
 
         with conn.cursor() as cursor:
             sql = "INSERT INTO PROPERTY (ID_TERRAIN, ID_PROPERTY) VALUES(%s, %s);"
-            values = (client.id_property,id_property)
+            values = (client.id_property, id_property)
             cursor.execute(sql, values)
         conn.commit()
 
@@ -143,14 +141,16 @@ async def insert_data_client(client: InsertEconomicData, request: Request):
             # insert_to_table(conn, client.id_client, i+1, dates[i], dates[i+1])
             sql = "INSERT INTO STAGE_CLIENT (ID_CLIENT, ID_STAGE, STAGE_START_DATE, STAGE_END_DATE, CONDITIONS) VALUES (%s, %s, %s, %s, 0);"
             with conn.cursor() as cursor:
-                cursor.execute(sql, (client.id_client, i+1, dates[i], dates[i+1]))
+                cursor.execute(
+                    sql, (client.id_client, i+1, dates[i], dates[i+1]))
             conn.commit()
 
         for feature in client.features:
-            print(feature["name"],feature["value"])
+            print(feature["name"], feature["value"])
             sql = "INSERT INTO FEATUREPROPERTY (ID_TERRAIN, ID_FEATURE, VALUE_FEATURE,ID_PROPERTY) VALUES(%s, (SELECT f.ID_FEATURE from FEATURE f WHERE f.NAME_FEATURE = %s),%s,%s);"
             with conn.cursor() as cursor:
-                values=(client.id_property,dic[feature["name"]],feature["value"],id_property)
+                values = (client.id_property,
+                          dic[feature["name"]], feature["value"], id_property)
                 cursor.execute(sql, values)
 
             conn.commit()
@@ -267,6 +267,7 @@ async def get_employees():
     except Exception as e:
         raise HTTPException(status_code=409, detail=str(e))
 
+
 @client.get('/api/employes')
 async def get_employees():
 
@@ -353,6 +354,7 @@ async def insert_property(property: InsertPropertyData):
     finally:
         conn.close()
 
+
 def get_stage_report_data(id_client: str):
     conn = connection()
     try:
@@ -384,6 +386,7 @@ def get_stage_report_data(id_client: str):
     except Exception as e:
         raise HTTPException(status_code=409, detail={e})
 
+
 @client.get('/api/reportstage/{id_client}')
 async def get_stage_report(id_client: str):
 
@@ -391,8 +394,9 @@ async def get_stage_report(id_client: str):
 
     pdf = ReportStages()
     name = person["name_client"] + " " + person["lastname_client"]
-    #pdf.content(name, person["id_client"],consultant["email_employee"], stages)
-    pdf.content(name, person["id_client"],"kledesma@consorcioaccion.com", stages)
+    # pdf.content(name, person["id_client"],consultant["email_employee"], stages)
+    pdf.content(name, person["id_client"],
+                "kledesma@consorcioaccion.com", stages)
     pdf.output('reporte_proyecto.pdf', 'F')
 
     # Crear un archivo temporal para almacenar el PDF
@@ -404,7 +408,7 @@ async def get_stage_report(id_client: str):
     with open(filename, mode='rb') as f:
         content = f.read()
 
-    os.unlink(filename)  
+    os.unlink(filename)
 
     response = Response(content=content, media_type='application/pdf')
     response.headers['Content-Disposition'] = f'attachment; filename= etapas.pdf'
@@ -412,31 +416,31 @@ async def get_stage_report(id_client: str):
 
 
 @client.get('/api/notifications/')
-async def get_stage_report(request:Request):
+async def get_stage_report(request: Request):
     conn = connection()
     try:
 
-        if "jwt" not in  request.cookies:
+        if "jwt" not in request.cookies:
             print("No hay cookie")
             raise HTTPException(status_code=401, detail="No autenticado")
-            
+
         cookie: str = request.cookies["jwt"]
-        cookie = jwt.decode(cookie,SECRET_KEY,algorithms=['HS256'])
+        cookie = jwt.decode(cookie, SECRET_KEY, algorithms=['HS256'])
         id_employee = cookie['iss']
 
         with conn.cursor() as cursor:
             sql = "SELECT * FROM EMPLOYEE WHERE id_employee = %s;"
-            cursor.execute(sql,(id_employee))
+            cursor.execute(sql, (id_employee))
             answer = cursor.fetchone()
 
         with conn.cursor() as cursor:
 
-            if(answer["POSITION_EMPLOYEE"] == "Secretaria"):
+            if (answer["POSITION_EMPLOYEE"] == "Secretaria"):
                 sql = "SELECT sc.ID_STAGE, st.NAME_STAGE, sc.STAGE_END_DATE, c.ID_CLIENT,c.NAME_CLIENT, c.LASTNAME_CLIENT, e.NAME_EMPLOYEE, e.LASTNAME_EMPLOYEE, sc.CONDITIONS FROM STAGE_CLIENT sc JOIN SUBSCRIBE s ON sc.ID_CLIENT = s.ID_CLIENT JOIN CLIENT c ON c.ID_CLIENT = s.ID_CLIENT JOIN EMPLOYEE e ON e.ID_EMPLOYEE = s.ID_EMPLOYEE JOIN STAGE st ON st.ID_STAGE = sc.ID_STAGE WHERE CONDITIONS = 0 AND STAGE_END_DATE > NOW() ORDER BY sc.STAGE_START_DATE ASC LIMIT 10"
                 cursor.execute(sql)
             else:
                 sql = "SELECT sc.ID_STAGE, st.NAME_STAGE, sc.STAGE_END_DATE, c.ID_CLIENT,c.NAME_CLIENT, c.LASTNAME_CLIENT, e.NAME_EMPLOYEE, e.LASTNAME_EMPLOYEE, sc.CONDITIONS FROM STAGE_CLIENT sc JOIN SUBSCRIBE s ON sc.ID_CLIENT = s.ID_CLIENT JOIN CLIENT c ON c.ID_CLIENT = s.ID_CLIENT JOIN EMPLOYEE e ON e.ID_EMPLOYEE = s.ID_EMPLOYEE JOIN STAGE st ON st.ID_STAGE = sc.ID_STAGE WHERE CONDITIONS = 0 AND STAGE_END_DATE > NOW() AND e.ID_EMPLOYEE = %s  ORDER BY sc.STAGE_START_DATE ASC LIMIT 10"
-                cursor.execute(sql,(id_employee))
+                cursor.execute(sql, (id_employee))
 
             answer = cursor.fetchall()
             if answer is None:
@@ -449,6 +453,7 @@ async def get_stage_report(request:Request):
         raise e
     except Exception as e:
         raise HTTPException(status_code=409, detail={e})
+
 
 @client.put('/api/update/stage')
 async def insert_data_client(stage: UpdateStage):
@@ -465,3 +470,33 @@ async def insert_data_client(stage: UpdateStage):
         raise e
     except Exception as e:
         raise HTTPException(status_code=409, detail={e})
+
+
+@client.post('/api/reschedule/')
+async def reschedule_stages(data: UpdateStage):
+    conn = connection()
+    try:
+        with conn.cursor() as cursor:
+            sql = "UPDATE STAGE_CLIENT SET  STAGE_END_DATE = ADDDATE(NOW(), INTERVAL 1 MONTH) WHERE ID_STAGE = %s AND ID_CLIENT = %s"
+            cursor.execute(sql, (data.id_stage, data.id_client))
+        conn.commit()
+        meses = 3
+        for i in range(int(data.id_stage), 7):
+            with conn.cursor() as cursor:
+                sql = "UPDATE STAGE_CLIENT SET STAGE_END_DATE = DATE_ADD( (SELECT t.STAGE_END_DATE FROM (SELECT STAGE_END_DATE FROM STAGE_CLIENT WHERE ID_STAGE = %s AND ID_CLIENT = %s) t ), INTERVAL %s MONTH) WHERE ID_STAGE = %s AND ID_CLIENT = %s;"
+                values = (data.id_stage, data.id_client, meses, i+1, data.id_client)
+                cursor.execute(sql, values)
+            meses += 3
+            conn.commit()
+
+
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=409, detail={e})
+
+
+@client.get('/api/report/reservation/{id_client}')
+async def get_reservation_report(id_client: str):
+
+    return 0

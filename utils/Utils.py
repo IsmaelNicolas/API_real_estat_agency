@@ -36,3 +36,21 @@ def generar_uuid():
     new_uuid = uuid.uuid4()
     final_uuid_str = "{}-{}-{}-{}-{}".format(new_uuid.hex[0:8], new_uuid.hex[8:12], new_uuid.hex[12:16], new_uuid.hex[16:20], new_uuid.hex[20:])
     return final_uuid_str
+
+
+def sumar_fechas(fecha, n):
+    # Convertir la cadena en un objeto datetime.date
+    fecha_obj = datetime.datetime.strptime(fecha, "%Y-%m-%d").date()
+    # Obtener la fecha actual
+    hoy = datetime.date.today()
+    # Crear una lista para almacenar las fechas
+    fechas = []
+    # Si la fecha dada es menor que la fecha actual, sumar 30 días n veces
+    if fecha_obj < hoy:
+        for i in range(n):
+            fecha_obj += datetime.timedelta(days=30)
+            fechas.append(fecha_obj.strftime("%Y-%m-%d"))
+    # Devolver la fecha dada si es mayor o igual que la fecha actual
+    else:
+        fechas.append(fecha)
+    return fechas
