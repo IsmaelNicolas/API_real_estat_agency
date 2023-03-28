@@ -100,7 +100,7 @@ async def get_client_by_lastname(lastname: str, request: Request):
 
 @client.put('/api/clients/insert/economiccard')
 async def insert_data_client(client: InsertEconomicData, request: Request):
-    print(client)
+    #print(client)
     dic = {"finishes": "Acabados", "property_type": "Tipo de propiedad",
                "floors": "Pisos",  "value":"Costos", "construction":"Contruccion m2", "terrain": "Terreno m2"}
     try:
@@ -112,13 +112,17 @@ async def insert_data_client(client: InsertEconomicData, request: Request):
             cursor.execute(sql, values)
         conn.commit()
 
+        
+
         with conn.cursor() as cursor:
-            sql = "INSERT INTO BUY (ID_CLIENT, ID_TERRAIN,PAYMENT_VALUE,PAYMENT_DATE) VALUES(%s, %s,%s,CURRENT_DATE());"
+            sql = "INSERT INTO BUY (ID_CLIENT, ID_TERRAIN, PAYMENT_DATE, PAYMENT_VALUE) VALUES(%s, %s, CURRENT_DATE() , %s);"
             values = (client.id_client, client.id_property, client.payment)
             cursor.execute(sql, values)
         conn.commit()
 
         id_property = generar_uuid()
+        print(id_property)
+
         with conn.cursor() as cursor:
             sql = "INSERT INTO PROPERTY (ID_TERRAIN, ID_PROPERTY) VALUES(%s, %s);"
             values = (client.id_property,id_property)
@@ -144,9 +148,9 @@ async def insert_data_client(client: InsertEconomicData, request: Request):
 
         for feature in client.features:
             print(feature["name"],feature["value"])
-            sql = "INSERT INTO FEATUREPROPERTY (ID_TERRAIN, ID_FEATURE, VALUE_FEATURE,ID_PROPERTY) VALUES(%s, (SELECT f.ID_FEATURE from FEATURE f WHERE f.NAME_FEATURE = %s),%s);"
+            sql = "INSERT INTO FEATUREPROPERTY (ID_TERRAIN, ID_FEATURE, VALUE_FEATURE,ID_PROPERTY) VALUES(%s, (SELECT f.ID_FEATURE from FEATURE f WHERE f.NAME_FEATURE = %s),%s,%s);"
             with conn.cursor() as cursor:
-                values=(client.id_client,dic[feature["name"]],feature["value"],id_property)
+                values=(client.id_property,dic[feature["name"]],feature["value"],id_property)
                 cursor.execute(sql, values)
 
             conn.commit()
@@ -206,7 +210,7 @@ async def get_property_data(id_client: str, request: Request):
     conn = connection()
     try:
         with conn.cursor() as cursor:
-            sql = "SELECT pr.ID_PROPERTY ,pr.AREA ,pr.URBANIZATION ,pr.NEIGHBORHOOD  from PURCHASE p , PROPERTY pr,CLIENT c WHERE  p.ID_PROPERTY =pr.ID_PROPERTY AND c.ID_CLIENT = p.ID_CLIENT AND p.ID_CLIENT =  %s;"
+            sql = "SELECT t.ID_TERRAIN ,t.AREA ,t.URBANIZATION ,t.NEIGHBORHOOD  FROM BUY b ,PROPERTY p ,CLIENT c ,TERRAIN t WHERE b.ID_TERRAIN = t.ID_TERRAIN AND c.ID_CLIENT = %s;"
             cursor.execute(sql, (id_client))
             answer = cursor.fetchone()
             if answer is None:

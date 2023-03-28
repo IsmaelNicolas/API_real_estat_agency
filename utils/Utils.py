@@ -33,8 +33,6 @@ def addThreeMonths(dateString):
     return newDateFormatted
 
 def generar_uuid():
-    uuid_str = str(uuid.uuid1())
-    time_str = uuid_str.split("-")[0]
-    new_uuid = uuid.uuid1(node=uuid.getnode(), clock_seq=uuid.getnode(), time=int(time_str, 16))
-    final_uuid_str = str(new_uuid).replace("-", "")
+    new_uuid = uuid.uuid4()
+    final_uuid_str = "{}-{}-{}-{}-{}".format(new_uuid.hex[0:8], new_uuid.hex[8:12], new_uuid.hex[12:16], new_uuid.hex[16:20], new_uuid.hex[20:])
     return final_uuid_str
