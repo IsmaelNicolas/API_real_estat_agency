@@ -252,7 +252,7 @@ async def get_employees():
     try:
         with conn.cursor() as cursor:
 
-            sql = "SELECT ID_EMPLOYEE, EMP_ID_EMPLOYEE, NAME_EMPLOYEE, LASTNAME_EMPLOYEE FROM EMPLOYEE WHERE PERMISSIONS != 'admin'"
+            sql = "SELECT ID_EMPLOYEE, EMP_ID_EMPLOYEE, NAME_EMPLOYEE, LASTNAME_EMPLOYEE FROM EMPLOYEE WHERE PERMISSIONS != 'admin' AND POSITION_EMPLOYEE = 'Asesor'"
             cursor.execute(sql, ())
             answer = cursor.fetchall()
 
@@ -368,8 +368,8 @@ async def insert_property(property: InsertPropertyData):
         conn = connection()
         with conn.cursor() as cursor:
 
-            sql = "INSERT INTO TERRAIN (TERRAIN, NEIGHBORHOOD, URBANIZATION, AREA, MINIMUM, QUANTITY) VALUES(%s,%s , %s,%s, %s, %s);"
-            values = (property.id_property, property.neighborhood, property.urbanization,
+            sql = "INSERT INTO TERRAIN (ID_TERRAIN, NEIGHBORHOOD, URBANIZATION, AREA, MINIMUM, QUANTITY) VALUES(%s,%s , %s,%s, %s, %s);"
+            values = (property.id_terrain, property.neighborhood, property.urbanization,
                       property.area, property.minimum, property.quantity)
             cursor.execute(sql, values)
             conn.commit()
@@ -448,7 +448,7 @@ async def get_stage_report():
     try:
         with conn.cursor() as cursor:
 
-            sql = "SELECT sc.ID_STAGE, st.NAME_STAGE, sc.STAGE_END_DATE, c.ID_CLIENT,c.NAME_CLIENT, c.LASTNAME_CLIENT, e.NAME_EMPLOYEE, e.LASTNAME_EMPLOYEE, sc.CONDITIONS FROM STAGE_CLIENT sc JOIN SUBSCRIBE s ON sc.ID_CLIENT = s.ID_CLIENT JOIN CLIENT c ON c.ID_CLIENT = s.ID_CLIENT JOIN EMPLOYEE e ON e.ID_EMPLOYEE = s.ID_EMPLOYEE JOIN STAGE st ON st.ID_STAGE = sc.ID_STAGE WHERE CONDITIONS = 0 AND STAGE_END_DATE > NOW() ORDER BY sc.STAGE_START_DATE ASC LIMIT 5"
+            sql = "SELECT sc.ID_STAGE, st.NAME_STAGE, sc.STAGE_END_DATE, c.ID_CLIENT,c.NAME_CLIENT, c.LASTNAME_CLIENT, e.NAME_EMPLOYEE, e.LASTNAME_EMPLOYEE, sc.CONDITIONS FROM STAGE_CLIENT sc JOIN SUBSCRIBE s ON sc.ID_CLIENT = s.ID_CLIENT JOIN CLIENT c ON c.ID_CLIENT = s.ID_CLIENT JOIN EMPLOYEE e ON e.ID_EMPLOYEE = s.ID_EMPLOYEE JOIN STAGE st ON st.ID_STAGE = sc.ID_STAGE WHERE CONDITIONS = 0 AND STAGE_END_DATE > NOW() ORDER BY sc.STAGE_START_DATE ASC LIMIT 10"
             cursor.execute(sql)
             answer = cursor.fetchall()
             if answer is None:
@@ -461,7 +461,6 @@ async def get_stage_report():
         raise e
     except Exception as e:
         raise HTTPException(status_code=409, detail={e})
-
 
 @client.put('/api/update/stage')
 async def insert_data_client(stage: UpdateStage):

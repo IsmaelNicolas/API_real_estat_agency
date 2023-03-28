@@ -18,7 +18,7 @@ class InsertEmployee(BaseModel):
 class InsertPropertyData(BaseModel):
     emp_id_employee: Optional[str]
     position_employee:Optional[str]
-    id_property: str
+    id_terrain: str
     area:str
     neighborhood:str
     quantity:str
