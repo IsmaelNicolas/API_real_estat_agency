@@ -289,47 +289,6 @@ async def get_employees():
     except Exception as e:
         raise HTTPException(status_code=409, detail=str(e))
 
-@client.get('/api/employees/admin')
-async def get_employees():
-
-    conn = connection()
-    try:
-        with conn.cursor() as cursor:
-
-            sql = "SELECT ID_EMPLOYEE, EMP_ID_EMPLOYEE, NAME_EMPLOYEE, LASTNAME_EMPLOYEE,POSITION_EMPLOYEE FROM EMPLOYEE WHERE PERMISSIONS != 'admin'"
-            cursor.execute(sql, ())
-            answer = cursor.fetchall()
-
-            if answer is None:
-                raise HTTPException(status_code=404, detail="Client not found")
-
-            return [response2dict(answer=el) for el in answer]
-
-    except HTTPException as e:
-        raise e
-
-    except Exception as e:
-        raise HTTPException(status_code=409, detail=str(e))
-
-
-def get_data_report(id_client: str, id_employee: str):
-    conn = connection()
-    try:
-        with conn.cursor() as cursor:
-
-            sql = "SELECT c.NAME_CLIENT, c.LASTNAME_CLIENT, sc.STAGE_START_DATE, e.EMAIL_EMPLOYEE FROM CLIENT c JOIN STAGE_CLIENT sc ON c.ID_CLIENT = sc.ID_CLIENT JOIN EMPLOYEE e ON e.ID_EMPLOYEE = %s WHERE sc.STAGE_START_DATE >= NOW() AND c.ID_CLIENT = %s ORDER BY sc.STAGE_START_DATE LIMIT 1 ;"
-            cursor.execute(sql, (id_employee, id_client))
-            answer = cursor.fetchone()
-            if answer is None:
-                raise HTTPException(status_code=404, detail="Client not found")
-
-            return response2dict(answer=answer)
-
-    except HTTPException as e:
-        raise e
-    except Exception as e:
-        raise HTTPException(status_code=409, detail={e})
-
 
 @client.get('/api/report/{id_client}')
 async def get_report_PDF(id_client: str, request: Request):
