@@ -274,7 +274,7 @@ async def get_employees():
     try:
         with conn.cursor() as cursor:
 
-            sql = "SELECT ID_EMPLOYEE, EMP_ID_EMPLOYEE, NAME_EMPLOYEE, LASTNAME_EMPLOYEE FROM EMPLOYEE WHERE PERMISSIONS == 'admin'"
+            sql = "SELECT ID_EMPLOYEE, EMP_ID_EMPLOYEE, NAME_EMPLOYEE, LASTNAME_EMPLOYEE FROM EMPLOYEE WHERE PERMISSIONS = 'admin'"
             cursor.execute(sql, ())
             answer = cursor.fetchall()
 
