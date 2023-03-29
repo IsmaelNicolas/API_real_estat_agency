@@ -381,7 +381,7 @@ def get_stage_report_data(id_client: str):
             if hour == None:
                 raise HTTPException(status_code=404, detail="Hour not foud")
             hour["MEETING_TIME"] = str( hour["MEETING_TIME"])
-            #print(hour)
+            print(hour)
         
         with conn.cursor() as cursor:
             sql = "SELECT c.ID_CLIENT,c.NAME_CLIENT ,c.LASTNAME_CLIENT from CLIENT as c WHERE ID_CLIENT =  %s;"

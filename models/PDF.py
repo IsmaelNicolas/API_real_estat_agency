@@ -87,8 +87,8 @@ class ReportStages(FPDF):
         self.cell(40, 10, "Hora:", 0, 0)
         self.set_font("Times", "", 12)
         self.cell(-10)
-        self.cell(0, 10, hora["meeting_time"], 0, 1)
-
+        self.cell(0, 10, hora["meeting_time"]if hora["meeting_time"] !="None" else str(etapas[6]["stage_end_date"]).split()[1] , 0, 1)
+        
         self.ln()
 
         # Imprimir la tabla
