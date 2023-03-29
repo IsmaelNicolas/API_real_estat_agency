@@ -32,16 +32,16 @@ class ReportStages(FPDF):
     def header(self):
     # Define el encabezado del documento
         width= self.w
-        image_width = 35
+        image_width = 47
         x = (width - image_width) / 2
         self.image("static/logo.png", x=x, y=10, w=image_width )
         self.ln(30)
 
 
 
-    def content(self, cliente, cedula, asesor, etapas):
+    def content(self, cliente, cedula, asesor, etapas,hora):
         # Definir el contenido
-        # print(etapas)
+        #print(etapas)
         self.set_right_margin(23)
         documents = [
             "3 Últimos Roles de pago",
@@ -55,16 +55,15 @@ class ReportStages(FPDF):
         part3 = "En caso de que las fechas a la asistencia del proceso se establezcan días domingos y feriados, será programado para el siguiente día hábil."
         
         self.set_font("Times", "", 12)
-
         max_name_width = self.get_max_width(etapas, "name_stage")
-        #max_start_width = self.get_max_width(etapas, "stage_start_date")
+        max_condition_width = self.get_max_width(etapas, "conditions")
         max_end_width = self.get_max_width(etapas, "stage_end_date")
         max_duration_width = self.get_string_width("presencial")
 
         # Definir las columnas de la tabla
         col_name_width = max_name_width + 10
-        #col_start_width = max_start_width + 6
-        col_end_width = max_end_width + 6
+        col_condition_width = max_condition_width + 20
+        col_end_width = max_end_width + 4
         col_duration_width = max_duration_width + 6
 
         # Definir la altura de fila
@@ -72,7 +71,7 @@ class ReportStages(FPDF):
 
         # Calcular la posición x para centrar la tabla en la página
         page_width = self.w
-        table_width = col_name_width + col_end_width + col_duration_width
+        table_width = col_name_width + col_end_width + col_duration_width + col_condition_width
         self.x_pdf = (page_width - table_width) / 2
 
         self.set_xy(self.x_pdf, self.y)
@@ -88,7 +87,7 @@ class ReportStages(FPDF):
         self.cell(40, 10, "Hora:", 0, 0)
         self.set_font("Times", "", 12)
         self.cell(-10)
-        self.cell(0, 10, str(etapas[0]["stage_end_date"]).split()[1], 0, 1)
+        self.cell(0, 10, hora["meeting_time"], 0, 1)
 
         self.ln()
 
@@ -99,6 +98,7 @@ class ReportStages(FPDF):
         self.cell(col_end_width, row_height, "Fecha reunión", border="B")
         self.cell(col_name_width, row_height, "Etapa", border="B")
         self.cell(col_duration_width, row_height, "Asistencia", border="B")
+        self.cell(col_condition_width, row_height, "Aprovado", border="B")
 
         self.set_font("Times", "I", 12)
 
@@ -114,10 +114,12 @@ class ReportStages(FPDF):
         for etapa in etapas:
             self.set_fill_color(r,g,b)
             self.set_xy(self.x_pdf, self.y)
+            #print(etapa["conditions"])
 
             self.cell(col_end_width, row_height, str(etapa["stage_end_date"]).split()[0], border=BORDER, fill=True)
             self.cell(col_name_width, row_height,etapa["name_stage"], border=BORDER, fill=True)
             self.cell(col_duration_width, row_height,ASISTANCE, border=BORDER, fill=True)
+            self.cell(col_condition_width, row_height,"Si" if etapa["conditions"] else "No", border=BORDER, fill=True)
 
             if primera_etapa:
                 BORDER = 0
@@ -165,6 +167,7 @@ class ReportStages(FPDF):
 
     def get_max_width(self, items, attribute):
         max_width = 0
+        #print(items,attribute)
         for item in items:
             text = str(item[attribute])
             width = self.get_string_width(text)

@@ -375,6 +375,15 @@ def get_stage_report_data(id_client: str):
     conn = connection()
     try:
         with conn.cursor() as cursor:
+            sql = "SELECT MEETING_TIME  FROM STAGE_CLIENT sc WHERE ID_CLIENT = %s and CONDITIONS = 0 ORDER by STAGE_END_DATE LIMIT 1"
+            cursor.execute(sql, (id_client))
+            hour = cursor.fetchone()
+            if hour == None:
+                raise HTTPException(status_code=404, detail="Hour not foud")
+            hour["MEETING_TIME"] = str( hour["MEETING_TIME"])
+            #print(hour)
+        
+        with conn.cursor() as cursor:
             sql = "SELECT c.ID_CLIENT,c.NAME_CLIENT ,c.LASTNAME_CLIENT from CLIENT as c WHERE ID_CLIENT =  %s;"
             cursor.execute(sql, (id_client))
             person = cursor.fetchone()
@@ -382,7 +391,7 @@ def get_stage_report_data(id_client: str):
                 raise HTTPException(status_code=404, detail="Stage not foud")
 
         with conn.cursor() as cursor:
-            sql = "SELECT sc.STAGE_START_DATE , sc.STAGE_END_DATE , s.NAME_STAGE  from STAGE_CLIENT as sc, STAGE as s  WHERE ID_CLIENT = %s and s.ID_STAGE =sc.ID_STAGE ;"
+            sql = "SELECT sc.STAGE_START_DATE , sc.STAGE_END_DATE , s.NAME_STAGE ,sc.CONDITIONS  from STAGE_CLIENT as sc, STAGE as s  WHERE ID_CLIENT = %s and s.ID_STAGE =sc.ID_STAGE ;"
             cursor.execute(sql, (id_client))
             stage = cursor.fetchall()
             if stage == ():
@@ -395,7 +404,7 @@ def get_stage_report_data(id_client: str):
             if stage == ():
                 raise HTTPException(status_code=404, detail="Stage not foud")
 
-        return response2dict(person), [response2dict(answer=ans) for ans in stage], response2dict(consultant)
+        return response2dict(person), [response2dict(answer=ans) for ans in stage], response2dict(consultant) , response2dict(hour)
 
     except HTTPException as e:
         raise e
@@ -406,13 +415,13 @@ def get_stage_report_data(id_client: str):
 @client.get('/api/reportstage/{id_client}')
 async def get_stage_report(id_client: str):
 
-    person, stages, consultant = get_stage_report_data(id_client)
+    person, stages, consultant,hour = get_stage_report_data(id_client)
 
     pdf = ReportStages()
     name = person["name_client"] + " " + person["lastname_client"]
     # pdf.content(name, person["id_client"],consultant["email_employee"], stages)
     pdf.content(name, person["id_client"],
-                "kledesma@consorcioaccion.com", stages)
+                "kledesma@consorcioaccion.com", stages,hour)
     pdf.output('reporte_proyecto.pdf', 'F')
 
     # Crear un archivo temporal para almacenar el PDF
