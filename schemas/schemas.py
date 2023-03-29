@@ -68,3 +68,4 @@ class InsertEconomicData(BaseModel):
 class UpdateStage(BaseModel):
     id_client:str
     id_stage:str
+    meeting_time: Optional[str]

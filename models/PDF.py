@@ -281,7 +281,8 @@ class ReportReservation(FPDF):
         image_x = page_width - image_width - 20 # Margen derecho de 10
 
         # Imprimir la fila de firma
-        self.set_font("Times", "", 12)
+        self.set_font("Times", "", 13)
+        self.ln()
         self.cell(0, 10, "Firma: _______________________", 0, 0, "L")
         self.ln()
         self.set_y(-image_width + 20)

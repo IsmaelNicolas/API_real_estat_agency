@@ -493,8 +493,8 @@ async def reschedule_stages(data: UpdateStage):
     conn = connection()
     try:
         with conn.cursor() as cursor:
-            sql = "UPDATE STAGE_CLIENT SET  STAGE_END_DATE = ADDDATE(NOW(), INTERVAL 1 MONTH) WHERE ID_STAGE = %s AND ID_CLIENT = %s"
-            cursor.execute(sql, (data.id_stage, data.id_client))
+            sql = "UPDATE STAGE_CLIENT SET MEETING_TIME =%s STAGE_END_DATE = ADDDATE(NOW(), INTERVAL 1 MONTH) WHERE ID_STAGE = %s AND ID_CLIENT = %s"
+            cursor.execute(sql, (data.meeting_time,data.id_stage, data.id_client))
         conn.commit()
         meses = 3
         for i in range(int(data.id_stage), 7):
