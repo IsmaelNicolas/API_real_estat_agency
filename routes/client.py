@@ -111,6 +111,8 @@ async def insert_data_client(client: InsertEconomicData, request: Request):
             cursor.execute(sql, values)
         conn.commit()
 
+        print("update ok")
+
         with conn.cursor() as cursor:
             sql = "INSERT INTO BUY (ID_CLIENT, ID_TERRAIN, PAYMENT_DATE, PAYMENT_VALUE) VALUES(%s, %s, CURRENT_DATE() , %s);"
             values = (client.id_client, client.id_property, client.payment)
@@ -118,13 +120,15 @@ async def insert_data_client(client: InsertEconomicData, request: Request):
         conn.commit()
 
         id_property = generar_uuid()
-        print(id_property)
+        print("insert buy ok")
 
         with conn.cursor() as cursor:
             sql = "INSERT INTO PROPERTY (ID_TERRAIN, ID_PROPERTY,ID_CLIENT) VALUES(%s, %s,%s);"
             values = (client.id_property, id_property,client.id_client)
             cursor.execute(sql, values)
         conn.commit()
+
+        print("insert property ok")
 
         fecha_hora_str = client.date_reunion
         fecha_hora = dt.datetime.strptime(fecha_hora_str, "%Y-%m-%dT%H:%M")
@@ -144,6 +148,8 @@ async def insert_data_client(client: InsertEconomicData, request: Request):
                     sql, (client.id_client, i+1, dates[i], dates[i+1]))
             conn.commit()
 
+        print("insert stage_client ok")
+
         for feature in client.features:
             print(feature["name"], feature["value"])
             sql = "INSERT INTO FEATUREPROPERTY (ID_TERRAIN, ID_FEATURE, VALUE_FEATURE,ID_PROPERTY) VALUES(%s, (SELECT f.ID_FEATURE from FEATURE f WHERE f.NAME_FEATURE = %s),%s,%s);"
@@ -154,12 +160,16 @@ async def insert_data_client(client: InsertEconomicData, request: Request):
 
             conn.commit()
 
+        print("insert feature property ok")
+
         with conn.cursor() as cursor:
-            sql = "UPDATE TERRAIN SET QUANTITY=QUANTITY - 1,  NEIGHBORHOOD='' WHERE ID_TERRAIN= %s;"
+            sql = "UPDATE TERRAIN SET QUANTITY=QUANTITY - 1  WHERE ID_TERRAIN= %s;"
             values = (client.id_property)
             cursor.execute(sql, values)
         conn.commit()
         
+        print("update terrain ok")
+
         conn.close()
 
         return client
