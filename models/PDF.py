@@ -182,9 +182,10 @@ class ReportReservation(FPDF):
         # Logo
         self.image("static/logo.png", 10, 8, 43)
         # Arial bold 15
-        self.set_font("Arial", "B", 20)
+        self.set_font("Arial", "B", 22)
+        self.ln(10)
         # Move to the right
-        self.cell(65)
+        self.cell(55)
         # Title
         self.set_text_color(239, 133, 38)
         title = "Separacion de cupo bien inmueble"
@@ -196,7 +197,7 @@ class ReportReservation(FPDF):
 
     def content(self, cliente, caracteristicas, asesor):
         print(caracteristicas)
-        self.my_title("Información del cliente",'L')
+        self.my_title("Datos personales",'L')
 
         self.my_data("Cédula de identidad: ",cliente["id_client"],0)
         self.my_data("Estado civil: ",cliente["marital_status_client"],1)
@@ -211,7 +212,8 @@ class ReportReservation(FPDF):
 
         self.my_data("Ocupación: ",cliente["ocupation_client"],0)
         self.my_data("Ingreso mensual: ","$" + str(cliente["salary_client"]),1)
-        self.my_data("Entidad: ",cliente["entity_client"],1)
+        self.my_data("Nombre de la entidad: ",cliente["entity_client"],1)
+        self.my_data("Cargo: ",cliente["client_position"],1)
 
 
         self.my_title('Información del cónyuge','L')
@@ -249,17 +251,15 @@ class ReportReservation(FPDF):
 
         # Información del asesor
         self.ln(10)
-        self.set_font("Arial", "B", 14)
-        self.cell(0, 10, "Información del asesor", 0, 1)
-        self.set_font("Arial", "", 12)
-        self.cell(0, 10, "Nombre: {}".format(asesor["name_employee"] + " " + asesor["lastname_employee"] ), 0, 1)
+        self.my_data("Asesor: ",asesor["name_employee"] + " " + asesor["lastname_employee"],1)
+        self.my_data("Código: ",cliente["id_terrain"],1)
 
     def len_text(self,text):
         w = self.get_string_width(text)
         return w+(w*0.33) 
     
     def my_title(self,text,align):
-        self.set_font("Arial", "B", 14)
+        self.set_font("Arial", "B", 15)
         self.set_text_color(239, 133, 38)
         self.cell(0, 10, text, 0, 1,align=align)
         self.set_text_color(0,0,0)

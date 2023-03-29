@@ -335,7 +335,7 @@ async def get_properties(request: Request):
     conn = connection()
     try:
         with conn.cursor() as cursor:
-            sql = "SELECT ID_TERRAIN, NEIGHBORHOOD, URBANIZATION, QUANTITY, AREA ,MINIMUM FROM TERRAIN;"
+            sql = "SELECT ID_TERRAIN, NEIGHBORHOOD, URBANIZATION, QUANTITY, AREA ,MINIMUM FROM TERRAIN WHERE QUANTITY > MINIMUM ;"
             cursor.execute(sql)
             answer = cursor.fetchall()
 
@@ -522,15 +522,16 @@ def get_data_report_reservation(id_client):
     conn = connection()
     try:
         with conn.cursor() as cursor:
-            sql = "SELECT * from CLIENT as c WHERE ID_CLIENT =  %s;"
+            sql = "SELECT c.*, p.ID_TERRAIN FROM CLIENT c JOIN PROPERTY p ON c.ID_CLIENT = p.ID_CLIENT WHERE p.ID_CLIENT = %s"
             cursor.execute(sql, (id_client))
             person = cursor.fetchone()
+            #print(person)
             if person == ():
                 raise HTTPException(status_code=404, detail="Stage not foud")
 
         with conn.cursor() as cursor:
-            sql = "SELECT f.NAME_FEATURE,fp.VALUE_FEATURE FROM BUY b ,TERRAIN t ,PROPERTY p ,CLIENT c ,FEATURE f ,FEATUREPROPERTY fp,EMPLOYEE e ,SUBSCRIBE s  WHERE c.ID_CLIENT = b.ID_CLIENT and p.ID_TERRAIN = b.ID_TERRAIN  and fp.ID_TERRAIN = b.ID_TERRAIN and fp.ID_FEATURE = f.ID_FEATURE and t.ID_TERRAIN = b.ID_TERRAIN  and c.ID_CLIENT = %s and e.ID_EMPLOYEE = (SELECT sb.ID_EMPLOYEE FROM SUBSCRIBE sb WHERE ID_CLIENT = %s) and s.ID_EMPLOYEE = e.ID_EMPLOYEE "
-            cursor.execute(sql, (id_client,id_client))
+            sql = "SELECT f.NAME_FEATURE ,fp.VALUE_FEATURE FROM FEATURE f JOIN FEATUREPROPERTY fp ON f.ID_FEATURE = fp.ID_FEATURE JOIN PROPERTY p ON fp.ID_PROPERTY = p.ID_PROPERTY JOIN BUY b ON p.ID_TERRAIN = b.ID_TERRAIN AND p.ID_CLIENT = b.ID_CLIENT WHERE b.ID_CLIENT = %s"
+            cursor.execute(sql, (id_client))
             features = cursor.fetchall()
             #print(features)
 
