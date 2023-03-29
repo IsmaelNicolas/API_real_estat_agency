@@ -4,7 +4,7 @@ from config.db import connection, SECRET_KEY
 from utils.Utils import get_cookies, response2dict, addThreeMonths, generar_uuid, sumar_fechas
 from schemas.schemas import InsertClientData, InsertEconomicData, InsertPropertyData, UpdateStage
 from models.PDF import PDF
-from models.PDF import ReportStages
+from models.PDF import ReportStages,ReportReservation
 import tempfile
 import datetime as dt
 import jwt
@@ -100,7 +100,7 @@ async def get_client_by_lastname(lastname: str, request: Request):
 
 @client.put('/api/clients/insert/economiccard')
 async def insert_data_client(client: InsertEconomicData, request: Request):
-    # print(client)
+    print(client)
     dic = {"finishes": "Acabados", "property_type": "Tipo de propiedad",
            "floors": "Pisos",  "value": "Costos", "construction": "Contruccion m2", "terrain": "Terreno m2"}
     try:
@@ -502,7 +502,55 @@ async def reschedule_stages(data: UpdateStage):
         raise HTTPException(status_code=409, detail={e})
 
 
+def get_data_report_reservation(id_client):
+    conn = connection()
+    try:
+        with conn.cursor() as cursor:
+            sql = "SELECT * from CLIENT as c WHERE ID_CLIENT =  %s;"
+            cursor.execute(sql, (id_client))
+            person = cursor.fetchone()
+            if person == ():
+                raise HTTPException(status_code=404, detail="Stage not foud")
+
+        with conn.cursor() as cursor:
+            sql = "SELECT f.NAME_FEATURE,fp.VALUE_FEATURE FROM BUY b ,TERRAIN t ,PROPERTY p ,CLIENT c ,FEATURE f ,FEATUREPROPERTY fp,EMPLOYEE e ,SUBSCRIBE s  WHERE c.ID_CLIENT = b.ID_CLIENT and p.ID_TERRAIN = b.ID_TERRAIN  and fp.ID_TERRAIN = b.ID_TERRAIN and fp.ID_FEATURE = f.ID_FEATURE and t.ID_TERRAIN = b.ID_TERRAIN  and c.ID_CLIENT = %s and e.ID_EMPLOYEE = (SELECT sb.ID_EMPLOYEE FROM SUBSCRIBE sb WHERE ID_CLIENT = %s) and s.ID_EMPLOYEE = e.ID_EMPLOYEE "
+            cursor.execute(sql, (id_client,id_client))
+            features = cursor.fetchall()
+            #print(features)
+
+        with conn.cursor() as cursor:
+            sql = "SELECT e.NAME_EMPLOYEE , e.LASTNAME_EMPLOYEE  FROM EMPLOYEE e ,SUBSCRIBE s WHERE e.ID_EMPLOYEE = s.ID_EMPLOYEE and s.ID_CLIENT = %s"
+            cursor.execute(sql, (id_client))
+            consultant = cursor.fetchone()
+            #print(consultant)
+
+        #return person,consultant,features
+        return response2dict(person), [response2dict(answer=ans) for ans in features], response2dict(consultant)
+
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=409, detail={e})
+
 @client.get('/api/report/reservation/{id_client}')
 async def get_reservation_report(id_client: str):
+    client,features,consultant = get_data_report_reservation(id_client=id_client)
+    pdf = ReportReservation()
+    
+    pdf.content(client,features,consultant)
+    pdf.output('reporte_reserva.pdf', 'F')
 
-    return 0
+    # Crear un archivo temporal para almacenar el PDF
+    with tempfile.NamedTemporaryFile(delete=False) as f:
+        pdf.output(f.name)
+        filename = f.name
+
+    # Leer el archivo temporal y devolver su contenido como respuesta HTTP
+    with open(filename, mode='rb') as f:
+        content = f.read()
+
+    os.unlink(filename)
+
+    response = Response(content=content, media_type='application/pdf')
+    response.headers['Content-Disposition'] = f'attachment; filename= reserva.pdf'
+    return response
