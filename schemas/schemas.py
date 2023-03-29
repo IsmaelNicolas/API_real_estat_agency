@@ -56,6 +56,7 @@ class InsertEconomicData(BaseModel):
     spouse_salary: str
     spouse_entity: str
     client_ocupation: str
+    client_position: str
     client_salary: str
     client_entity: str
     entity_direction: str
