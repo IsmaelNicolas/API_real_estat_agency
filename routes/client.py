@@ -106,9 +106,8 @@ async def insert_data_client(client: InsertEconomicData, request: Request):
     try:
         conn = connection()
         with conn.cursor() as cursor:
-            sql = "UPDATE CLIENT SET SPOUSE_NAME = %s, SPOUSE_OCUPATION = %s, SPOUSE_DIRECTION = %s, SPOUSE_SALARY = %s, SPOUSE_ENTITY = %s, OCUPATION_CLIENT = %s, SALARY_CLIENT = %s, ENTITY_CLIENT = %s, DIRECTION_ENTITY = %s CLIENT_POSITION = %s WHERE ID_CLIENT = %s"
-            values = (client.spouse_lastname, client.spouse_ocupation, client.spouse_direction, client.spouse_salary, client.spouse_entity,
-                      client.client_ocupation, client.client_salary, client.client_entity, client.entity_direction, client.client_position,client.id_client)
+            sql = "UPDATE CLIENT SET SPOUSE_NAME = %s, SPOUSE_OCUPATION = %s, SPOUSE_DIRECTION = %s, SPOUSE_SALARY = %s, SPOUSE_ENTITY = %s, OCUPATION_CLIENT = %s, SALARY_CLIENT = %s, ENTITY_CLIENT = %s, DIRECTION_ENTITY = %s ,CLIENT_POSITION = %s WHERE ID_CLIENT = %s"
+            values = (client.spouse_lastname, client.spouse_ocupation, client.spouse_direction, client.spouse_salary, client.spouse_entity,client.client_ocupation, client.client_salary, client.client_entity, client.entity_direction, client.client_position,client.id_client)
             cursor.execute(sql, values)
         conn.commit()
 
