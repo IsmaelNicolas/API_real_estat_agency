@@ -4,7 +4,7 @@ import pymysql
 HOST = '162.222.203.47'
 USER = 'root'
 PASSWORD = 'mysqlHom@rsin2023'
-DATABASE ='consorcio'
+DATABASE ='inmobiliaria'
 PORT = 3307
 
 def connection():
