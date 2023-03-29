@@ -22,8 +22,6 @@ class PDF(FPDF):
             self.cell(0, 10, txt="-" + item)
             self.ln(10)
 
-
-
 class ReportStages(FPDF):
     def __init__(self):
         super().__init__()
@@ -197,7 +195,7 @@ class ReportReservation(FPDF):
         self.ln(30)
 
     def content(self, cliente, caracteristicas, asesor):
-
+        print(caracteristicas)
         self.my_title("Información del cliente",'L')
 
         self.my_data("Cédula de identidad: ",cliente["id_client"],0)
