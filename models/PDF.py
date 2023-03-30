@@ -39,7 +39,7 @@ class ReportStages(FPDF):
 
     def content(self, cliente, cedula, asesor, etapas,hora):
         # Definir el contenido
-        #print(etapas)
+        print(str(etapas[1]["stage_end_date"]))
         self.set_right_margin(23)
         documents = [
             "3 Últimos Roles de pago",
@@ -61,7 +61,7 @@ class ReportStages(FPDF):
         # Definir las columnas de la tabla
         col_name_width = max_name_width + 10
         col_condition_width = max_condition_width + 20
-        col_end_width = max_end_width + 4
+        col_end_width = max_end_width + 13
         col_duration_width = max_duration_width + 6
 
         # Definir la altura de fila
@@ -85,7 +85,7 @@ class ReportStages(FPDF):
         self.cell(40, 10, "Hora:", 0, 0)
         self.set_font("Times", "", 12)
         self.cell(-10)
-        self.cell(0, 10, hora["meeting_time"]if hora["meeting_time"] !="None" else str(etapas[6]["stage_end_date"]).split()[1] , 0, 1)
+        self.cell(0, 10, hora["meeting_time"] , 0, 1)
         
         self.ln()
 
