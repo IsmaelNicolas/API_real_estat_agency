@@ -292,3 +292,52 @@ class ReportReservation(FPDF):
         # Insertar la imagen
         self.image("static/logo.png", image_x, self.y, image_width)
 
+
+class ReportSell(FPDF):
+    def __init__(self):
+        super().__init__()
+        self.add_page()
+
+    def _len_text(self,text):
+        w = self.get_string_width(text)
+        return w+(w*0.33) 
+    
+    def _my_title(self,text,align):
+        self.set_font("Arial", "B", 15)
+        self.set_text_color(239, 133, 38)
+        self.cell(0, 10, text, 0, 1,align=align)
+        self.set_text_color(0,0,0)
+
+    def _my_data(self,name,value,ln):
+        self.set_font("Arial", "B", 12)
+        self.cell(self.len_text(name), 10, name, 0, 0)
+        self.set_font("Arial", "", 12)
+        self.cell(self.len_text(str(value)) , 10, '{}'.format(value), 0, ln)
+
+
+    def header(self):
+        # Logo
+        self.image("static/logo.png", 10, 8, 43)
+        # Arial bold 15
+        self.set_font("Arial", "B", 22)
+        self.ln(10)
+        # Move to the right
+        self.cell(55)
+        # Title
+        self.set_text_color(239, 133, 38)
+        title = "Informe de ventas por mes"
+        self.cell(self.len_text(title), 10, title, 0,align='L')
+        self.cell(20, 10, '', 0, 0, '')
+        # Line break
+        self.set_left_margin(13)
+        self.ln(30)
+
+    def content(self):
+        pass
+
+    def footer(self) -> None:
+        # Posición a 1.5 cm del fondo
+        self.set_y(-15)
+        # Arial italic 8
+        self.set_font('Arial', 'I', 8)
+        self.cell(0, 10, str(self.page_no()), 0, 1,align='C')

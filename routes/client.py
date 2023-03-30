@@ -103,6 +103,11 @@ async def insert_data_client(client: InsertEconomicData, request: Request):
     print(client)
     dic = {"finishes": "Acabados", "property_type": "Tipo de propiedad",
            "floors": "Pisos",  "value": "Costos", "construction": "Contruccion m2", "terrain": "Terreno m2"}
+    
+    fecha_hora_str = client.date_reunion
+    fecha_hora = dt.datetime.strptime(fecha_hora_str, "%Y-%m-%dT%H:%M")
+    fecha_hora_formatted = fecha_hora.strftime('%Y-%m-%d %H:%M:%S')
+
     try:
         conn = connection()
         with conn.cursor() as cursor:
@@ -114,8 +119,8 @@ async def insert_data_client(client: InsertEconomicData, request: Request):
         print("update ok")
 
         with conn.cursor() as cursor:
-            sql = "INSERT INTO BUY (ID_CLIENT, ID_TERRAIN, PAYMENT_DATE, PAYMENT_VALUE) VALUES(%s, %s, CURRENT_DATE() , %s);"
-            values = (client.id_client, client.id_property, client.payment)
+            sql = "INSERT INTO BUY (ID_CLIENT, ID_TERRAIN, PAYMENT_DATE, PAYMENT_VALUE) VALUES(%s, %s, %s , %s);"
+            values = (client.id_client, client.id_property, fecha_hora_formatted,client.payment)
             cursor.execute(sql, values)
         conn.commit()
 
@@ -129,10 +134,6 @@ async def insert_data_client(client: InsertEconomicData, request: Request):
         conn.commit()
 
         print("insert property ok")
-
-        fecha_hora_str = client.date_reunion
-        fecha_hora = dt.datetime.strptime(fecha_hora_str, "%Y-%m-%dT%H:%M")
-        fecha_hora_formatted = fecha_hora.strftime('%Y-%m-%d %H:%M:%S')
 
         dates = [fecha_hora_formatted]
 
