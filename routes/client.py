@@ -4,7 +4,7 @@ from config.db import connection, SECRET_KEY
 from utils.Utils import get_cookies, response2dict, addThreeMonths, generar_uuid, sumar_fechas
 from schemas.schemas import InsertClientData, InsertEconomicData, InsertPropertyData, UpdateStage
 from models.PDF import PDF
-from models.PDF import ReportStages,ReportReservation
+from models.PDF import *
 import tempfile
 import datetime as dt
 import jwt
@@ -567,6 +567,55 @@ async def get_reservation_report(id_client: str):
     
     pdf.content(client,features,consultant)
     pdf.output('reporte_reserva.pdf', 'F')
+
+    # Crear un archivo temporal para almacenar el PDF
+    with tempfile.NamedTemporaryFile(delete=False) as f:
+        pdf.output(f.name)
+        filename = f.name
+
+    # Leer el archivo temporal y devolver su contenido como respuesta HTTP
+    with open(filename, mode='rb') as f:
+        content = f.read()
+
+    os.unlink(filename)
+
+    response = Response(content=content, media_type='application/pdf')
+    response.headers['Content-Disposition'] = f'attachment; filename= reserva.pdf'
+    return response
+
+def get_sales_data(month:str):
+    conn = connection()
+    
+    if month == "0":
+        sql = "SELECT c.ID_CLIENT ,CONCAT(c.NAME_CLIENT, ' ', c.LASTNAME_CLIENT) AS FULLNAME_CLIENT ,CONCAT(e.NAME_EMPLOYEE, ' ', e.LASTNAME_EMPLOYEE) AS FULLNAME_EMPLOYEE ,MONTH(PAYMENT_DATE) AS MONTHP, b.ID_TERRAIN ,b.PAYMENT_VALUE FROM BUY b, CLIENT c, EMPLOYEE e, SUBSCRIBE s WHERE c.ID_CLIENT = b.ID_CLIENT AND s.ID_EMPLOYEE = e.ID_EMPLOYEE AND c.ID_CLIENT = s.ID_CLIENT ORDER BY PAYMENT_DATE;"
+        values = ()
+    else:
+        sql = "SELECT c.ID_CLIENT ,CONCAT(c.NAME_CLIENT, ' ', c.LASTNAME_CLIENT) AS FULLNAME_CLIENT ,CONCAT(e.NAME_EMPLOYEE, ' ', e.LASTNAME_EMPLOYEE) AS FULLNAME_EMPLOYEE ,MONTH(PAYMENT_DATE) AS MONTHP, b.ID_TERRAIN ,b.PAYMENT_VALUE FROM BUY b, CLIENT c, EMPLOYEE e, SUBSCRIBE s WHERE MONTH(PAYMENT_DATE) = %s AND c.ID_CLIENT = b.ID_CLIENT AND s.ID_EMPLOYEE =e.ID_EMPLOYEE AND c.ID_CLIENT = s.ID_CLIENT ORDER BY PAYMENT_DATE;"
+        values = (month,)
+
+    try:
+        with conn.cursor() as cursor:
+            #print(values)
+            cursor.execute(sql, values)
+            answer = cursor.fetchall()
+            #print(answer)
+            if answer == None:
+                raise HTTPException(status_code=404, detail="Sales not foud")
+
+            return [response2dict(answer=ans) for ans in answer]
+
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=409, detail={e})
+
+@client.get('/api/report/sales/{month}')
+async def get_sales_report(month: str, request: Request):
+    
+    data = get_sales_data(month)
+    pdf = ReportSell()
+    pdf.content(data)
+    pdf.output('reporte_ventas.pdf', 'F')
 
     # Crear un archivo temporal para almacenar el PDF
     with tempfile.NamedTemporaryFile(delete=False) as f:

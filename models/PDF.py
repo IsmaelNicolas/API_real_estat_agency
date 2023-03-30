@@ -37,8 +37,6 @@ class ReportStages(FPDF):
         self.image("static/logo.png", x=x, y=10, w=image_width )
         self.ln(30)
 
-
-
     def content(self, cliente, cedula, asesor, etapas,hora):
         # Definir el contenido
         #print(etapas)
@@ -98,7 +96,7 @@ class ReportStages(FPDF):
         self.cell(col_end_width, row_height, "Fecha reunión", border="B")
         self.cell(col_name_width, row_height, "Etapa", border="B")
         self.cell(col_duration_width, row_height, "Asistencia", border="B")
-        self.cell(col_condition_width, row_height, "Aprovado", border="B")
+        self.cell(col_condition_width, row_height, "Aprobado", border="B")
 
         self.set_font("Times", "I", 12)
 
@@ -148,7 +146,6 @@ class ReportStages(FPDF):
         self.set_xy(self.x_pdf, self.y)
         self.multi_cell(0, 10, part3)
 
-
     def footer(self):
         # Definir posición x e y
         self.set_y(-30)
@@ -174,7 +171,6 @@ class ReportStages(FPDF):
             if width > max_width:
                 max_width = width
         return max_width
-
 
 class ReportReservation(FPDF):
     def __init__(self):
@@ -310,10 +306,82 @@ class ReportSell(FPDF):
 
     def _my_data(self,name,value,ln):
         self.set_font("Arial", "B", 12)
-        self.cell(self.len_text(name), 10, name, 0, 0)
+        self.cell(self._len_text(name), 10, name, 0, 0)
         self.set_font("Arial", "", 12)
-        self.cell(self.len_text(str(value)) , 10, '{}'.format(value), 0, ln)
+        self.cell(self._len_text(str(value)) , 10, '{}'.format(value), 0, ln)
 
+    def get_max_width(self, items, attribute):
+        max_width = 0
+        #print(items,attribute)
+        for item in items:
+            text = str(item[attribute])
+            width = self.get_string_width(text)
+            if width > max_width:
+                max_width = width
+        return max_width
+
+    def _tabla_pagos(self, header, data):
+        
+        meses = {1: "Enero", 2: "Febrero", 3: "Marzo", 4: "Abril", 5: "Mayo", 6: "Junio", 7: "Julio", 8: "Agosto", 9: "Septiembre", 10: "Octubre", 11: "Noviembre", 12: "Diciembre"}
+
+
+        # Colores, ancho de línea y fuente en negrita
+        self.set_fill_color(255, 255, 255)
+        self.set_text_color(0, 0, 0)
+        self.set_line_width(.3)
+        self.set_font("Times", "BI", 14)
+
+        headers =["id_client","fullname_client","fullname_employee","monthp","id_terrain","payment_value"]
+        max_w = []
+        max_w.append( self.get_max_width(data,"id_client") * 1.1)
+        max_w.append( self.get_max_width(data,"fullname_client") * 1.1)
+        max_w.append( self.get_max_width(data,"fullname_employee") * 1.1)
+        max_w.append( self.get_string_width("Septiembre")* 1.1)
+        max_w.append( self.get_max_width(data,"id_terrain") * 1.1)
+        max_w.append( self.get_max_width(data,"payment_value") * 1.5)
+
+        page_width = self.w
+        table_width = sum(max_w)
+        self.x_pdf = (page_width - table_width) / 2
+
+        row_height = self.font_size * 2
+
+        # Cabecera
+        i= 0
+        self.set_xy(self.x_pdf, self.y)
+        for col in header:
+            self.cell(max_w[i],row_height , col, 'B', 0, 'C', 1)
+            i+=1
+        self.ln()
+        # Restauración de colores y fuente
+        self.set_fill_color(2249,229,213)
+        self.set_text_color(0, 0, 0)
+        self.set_font("Times", "", 12)
+
+        row_height = self.font_size * 2
+        suma = 0 
+        # Datos
+        for row in data:
+            self.set_xy(self.x_pdf, self.y)
+            self.cell(max_w[0], row_height, str(row['id_client']), 0, 0, 'C', 1)
+            self.cell(max_w[1], row_height, row['fullname_client'] , 0, 0, 'C', 1)
+            #self.cell(40, row_height, row['lastname_client'], 0, 0, 'L', 1)
+            self.cell(max_w[2], row_height, row['fullname_employee'] , 0, 0, 'C', 1)
+            #self.cell(40, row_height, row['lastname_employee'], 0, 0, 'L', 1)
+            self.cell(max_w[3], row_height, meses[row['monthp']], 0, 0, 'C', 1)
+            self.cell(max_w[4], row_height, str(row['id_terrain']), 0, 0, 'C', 1)
+            self.cell(max_w[5], row_height, "$"+ str(row['payment_value']), 0, 0, 'L', 1)
+            self.ln()
+            suma +=float(row['payment_value'])
+        # Línea de cierre
+        #self.cell(40 * len(header), 0, '', 'T')
+        print(suma)
+        self.set_text_color(0,0,0)
+        self.set_font("Times", "B", 12)
+        self.cell(self._len_text("Valor total en ventas"), 10, "Valor en ventas", 0, 0)
+        self.set_font("Times", "", 12)
+        #self.set_text_color(239, 133, 38)
+        self.cell(0 , 10, '$ {}'.format(str(suma)), 0, 1)
 
     def header(self):
         # Logo
@@ -326,14 +394,20 @@ class ReportSell(FPDF):
         # Title
         self.set_text_color(239, 133, 38)
         title = "Informe de ventas por mes"
-        self.cell(self.len_text(title), 10, title, 0,align='L')
+        self.cell(self._len_text(title), 10, title, 0,align='L')
         self.cell(20, 10, '', 0, 0, '')
         # Line break
         self.set_left_margin(13)
         self.ln(30)
 
-    def content(self):
-        pass
+    def content(self,sales):
+        header = ['Cédula', 'Cliente', 'Asesor', 'Més', 'Terreno', 'Valor Pago']
+
+        if sales == [] :
+            self._my_title("No existen datos para ese mes",'C')
+            return
+        
+        self._tabla_pagos(header,sales)
 
     def footer(self) -> None:
         # Posición a 1.5 cm del fondo
