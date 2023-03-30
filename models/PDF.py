@@ -415,3 +415,53 @@ class ReportSell(FPDF):
         # Arial italic 8
         self.set_font('Arial', 'I', 8)
         self.cell(0, 10, str(self.page_no()), 0, 1,align='C')
+
+
+
+class ReportNextDate(FPDF):
+
+    def __init__(self):
+        super().__init__()
+        self.add_page()
+
+    def header(self):
+        # Logo
+        self.image("static/logo.png", 10, 8, 43)
+        # Arial bold 15
+        self.set_font("Arial", "B", 22)
+        self.ln(10)
+        # Move to the right
+        self.cell(55)
+        # Title
+        self.set_text_color(239, 133, 38)
+        title = "Reporte de proximas citas "
+        self.cell(self._len_text(title), 10, title, 0,align='R')
+        self.cell(20, 10, '', 0, 0, '')
+        # Line break
+        self.set_left_margin(13)
+        self.ln(30)
+
+    def content(self,data):
+        print(data)
+        
+
+    def footer(self) -> None:
+        # Posición a 1.5 cm del fondo
+        self.set_y(-15)
+        # Arial italic 8
+        self.set_font('Arial', 'I', 8)
+        self.cell(0, 10, str(self.page_no()), 0, 1,align='C')
+
+    def get_max_width(self, items, attribute):
+        max_width = 0
+        #print(items,attribute)
+        for item in items:
+            text = str(item[attribute])
+            width = self.get_string_width(text)
+            if width > max_width:
+                max_width = width
+        return max_width
+
+    def _len_text(self,text):
+        w = self.get_string_width(text)
+        return w+(w*0.33) 

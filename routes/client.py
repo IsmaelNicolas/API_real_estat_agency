@@ -466,7 +466,7 @@ async def get_stage_report(request: Request):
                 sql = "SELECT CONCAT(e.NAME_EMPLOYEE,' ',e.LASTNAME_EMPLOYEE) as \"employee\" ,sc.ID_CLIENT ,CONCAT(c.NAME_CLIENT ,' ',c.LASTNAME_CLIENT) as \"client\", sc.ID_STAGE , s.NAME_STAGE ,DATE(sc.STAGE_END_DATE) AS \"STAGE_END_DATE\" ,CAST(TIME_FORMAT(sc.MEETING_TIME, '%H:%i:%s') AS CHAR) AS MEETING_TIME FROM STAGE_CLIENT sc,STAGE s, CLIENT c ,EMPLOYEE e  ,SUBSCRIBE sb WHERE CONDITIONS = 0 AND s.ID_STAGE =sc.ID_STAGE AND sc.ID_CLIENT =c.ID_CLIENT AND sb.ID_EMPLOYEE = e.ID_EMPLOYEE AND sb.ID_CLIENT  = c.ID_CLIENT GROUP BY sc.ID_CLIENT ORDER BY sc.STAGE_END_DATE LIMIT 10"
                 cursor.execute(sql)
             else:
-                sql = "SELECT CONCAT(e.NAME_EMPLOYEE,' ',e.LASTNAME_EMPLOYEE) as employee , CONCAT(c.NAME_CLIENT ,' ',c.LASTNAME_CLIENT) as client , sc.ID_CLIENT , sc.ID_STAGE , s.NAME_STAGE ,sc.STAGE_END_DATE  ,sc.MEETING_TIME FROM STAGE_CLIENT sc,STAGE s ,EMPLOYEE e ,CLIENT c WHERE CONDITIONS = 0 AND s.ID_STAGE =sc.ID_STAGE AND sc.ID_CLIENT =c.ID_CLIENT AND e.ID_EMPLOYEE = %s GROUP BY sc.ID_CLIENT ORDER BY sc.STAGE_END_DATE LIMIT 10"
+                sql = "SELECT CONCAT(e.NAME_EMPLOYEE,' ',e.LASTNAME_EMPLOYEE) as employee , CONCAT(c.NAME_CLIENT ,' ',c.LASTNAME_CLIENT) as client , sc.ID_CLIENT , sc.ID_STAGE , s.NAME_STAGE ,sc.STAGE_END_DATE  ,CAST(TIME_FORMAT(sc.MEETING_TIME, '%H:%i:%s') AS CHAR) AS MEETING_TIME FROM STAGE_CLIENT sc,STAGE s ,EMPLOYEE e ,CLIENT c WHERE CONDITIONS = 0 AND s.ID_STAGE =sc.ID_STAGE AND sc.ID_CLIENT =c.ID_CLIENT AND e.ID_EMPLOYEE = %s GROUP BY sc.ID_CLIENT ORDER BY sc.STAGE_END_DATE LIMIT 10"
                 cursor.execute(sql, (id_employee))
 
             answer = cursor.fetchall()
@@ -480,7 +480,6 @@ async def get_stage_report(request: Request):
         raise e
     except Exception as e:
         raise HTTPException(status_code=409, detail={e})
-
 
 @client.put('/api/update/stage')
 async def insert_data_client(stage: UpdateStage):
@@ -611,7 +610,7 @@ def get_sales_data(month:str):
         raise HTTPException(status_code=409, detail={e})
 
 @client.get('/api/report/sales/{month}')
-async def get_sales_report(month: str, request: Request):
+async def get_sales_report(month: str ):
     
     data = get_sales_data(month)
     pdf = ReportSell()
@@ -632,3 +631,66 @@ async def get_sales_report(month: str, request: Request):
     response = Response(content=content, media_type='application/pdf')
     response.headers['Content-Disposition'] = f'attachment; filename= reserva.pdf'
     return response
+
+def get_next_data(request: Request):
+    conn = connection()
+    try:
+
+        if "jwt" not in request.cookies:
+            print("No hay cookie")
+            raise HTTPException(status_code=401, detail="No autenticado")
+
+        cookie: str = request.cookies["jwt"]
+        cookie = jwt.decode(cookie, SECRET_KEY, algorithms=['HS256'])
+        id_employee = cookie['iss']
+
+        with conn.cursor() as cursor:
+            sql = "SELECT * FROM EMPLOYEE WHERE id_employee = %s;"
+            cursor.execute(sql, (id_employee))
+            answer = cursor.fetchone()
+
+        with conn.cursor() as cursor:
+            cursor.execute("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''))")
+            #print(answer["POSITION_EMPLOYEE"])
+            if (answer["POSITION_EMPLOYEE"] == "Secretaria"):
+                sql = "SELECT CONCAT(e.NAME_EMPLOYEE,' ',e.LASTNAME_EMPLOYEE) as \"employee\" ,sc.ID_CLIENT ,CONCAT(c.NAME_CLIENT ,' ',c.LASTNAME_CLIENT) as \"client\", sc.ID_STAGE , s.NAME_STAGE ,DATE(sc.STAGE_END_DATE) AS \"STAGE_END_DATE\" ,CAST(TIME_FORMAT(sc.MEETING_TIME, '%H:%i:%s') AS CHAR) AS MEETING_TIME FROM STAGE_CLIENT sc,STAGE s, CLIENT c ,EMPLOYEE e  ,SUBSCRIBE sb WHERE CONDITIONS = 0 AND s.ID_STAGE =sc.ID_STAGE AND sc.ID_CLIENT =c.ID_CLIENT AND sb.ID_EMPLOYEE = e.ID_EMPLOYEE AND sb.ID_CLIENT  = c.ID_CLIENT GROUP BY sc.ID_CLIENT ORDER BY sc.STAGE_END_DATE LIMIT 10"
+                cursor.execute(sql)
+            else:
+                sql = "SELECT CONCAT(e.NAME_EMPLOYEE,' ',e.LASTNAME_EMPLOYEE) as employee , CONCAT(c.NAME_CLIENT ,' ',c.LASTNAME_CLIENT) as client , sc.ID_CLIENT , sc.ID_STAGE , s.NAME_STAGE ,sc.STAGE_END_DATE  ,sc.MEETING_TIME FROM STAGE_CLIENT sc,STAGE s ,EMPLOYEE e ,CLIENT c WHERE CONDITIONS = 0 AND s.ID_STAGE =sc.ID_STAGE AND sc.ID_CLIENT =c.ID_CLIENT AND e.ID_EMPLOYEE = %s GROUP BY sc.ID_CLIENT ORDER BY sc.STAGE_END_DATE LIMIT 10"
+                cursor.execute(sql, (id_employee))
+
+            answer = cursor.fetchall()
+            if answer is None:
+                raise HTTPException(
+                    status_code=404, detail="Clients not found")
+
+            return [response2dict(answer=ans) for ans in answer]
+
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=409, detail={e})
+
+@client.get('/api/report/nextDate')
+async def get_next_data_report(request: Request):
+    
+    data = get_next_data(request)
+    pdf = ReportNextDate()
+    pdf.content(data)
+    pdf.output('reporte_citas.pdf', 'F')
+
+    # Crear un archivo temporal para almacenar el PDF
+    with tempfile.NamedTemporaryFile(delete=False) as f:
+        pdf.output(f.name)
+        filename = f.name
+
+    # Leer el archivo temporal y devolver su contenido como respuesta HTTP
+    with open(filename, mode='rb') as f:
+        content = f.read()
+
+    os.unlink(filename)
+
+    response = Response(content=content, media_type='application/pdf')
+    response.headers['Content-Disposition'] = f'attachment; filename= reserva.pdf'
+    return response
+    return data
