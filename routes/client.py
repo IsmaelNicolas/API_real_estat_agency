@@ -143,10 +143,10 @@ async def insert_data_client(client: InsertEconomicData, request: Request):
 
         for i in range(len(dates)-1):
             # insert_to_table(conn, client.id_client, i+1, dates[i], dates[i+1])
-            sql = "INSERT INTO STAGE_CLIENT (ID_CLIENT, ID_STAGE, STAGE_START_DATE, STAGE_END_DATE, CONDITIONS) VALUES (%s, %s, %s, %s, 0);"
+            sql = "INSERT INTO STAGE_CLIENT (ID_CLIENT, ID_STAGE, STAGE_START_DATE, STAGE_END_DATE, CONDITIONS,MEETING_TIME) VALUES (%s, %s, %s, %s, 0,%s);"
             with conn.cursor() as cursor:
                 cursor.execute(
-                    sql, (client.id_client, i+1, dates[i], dates[i+1]))
+                    sql, (client.id_client, i+1, dates[i], dates[i+1],client.meeting_time))
             conn.commit()
 
         print("insert stage_client ok")

@@ -62,6 +62,7 @@ class InsertEconomicData(BaseModel):
     entity_direction: str
     id_property: str
     payment: str
+    meeting_time:str
     features: List[Dict[str, str]] = []
 
 
