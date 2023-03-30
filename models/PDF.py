@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from fpdf import FPDF
-
+from utils.Utils import segundos_a_tiempo
 
 class PDF(FPDF):
     def __init__(self):
@@ -323,8 +323,6 @@ class ReportSell(FPDF):
     def _tabla_pagos(self, header, data):
         
         meses = {1: "Enero", 2: "Febrero", 3: "Marzo", 4: "Abril", 5: "Mayo", 6: "Junio", 7: "Julio", 8: "Agosto", 9: "Septiembre", 10: "Octubre", 11: "Noviembre", 12: "Diciembre"}
-
-
         # Colores, ancho de línea y fuente en negrita
         self.set_fill_color(255, 255, 255)
         self.set_text_color(0, 0, 0)
@@ -422,7 +420,9 @@ class ReportNextDate(FPDF):
 
     def __init__(self):
         super().__init__()
-        self.add_page()
+        #self.add_page()
+        self.set_auto_page_break(0)
+        self.add_page(orientation='L')
 
     def header(self):
         # Logo
@@ -441,9 +441,73 @@ class ReportNextDate(FPDF):
         self.set_left_margin(13)
         self.ln(30)
 
-    def content(self,data):
-        print(data)
+    def encabezado(self,rol,max_w_employee,max_w_client,max_w_id_client,max_w_id_id_stage,max_w_name_stage,max_w_stage_end_date,max_w_meeting_time,row_height):
+        self.set_font("Times", "BI", 12)
+        self.set_xy(self.x_pdf, self.y)
+        self.cell(max_w_id_id_stage, row_height, "N°", border='B')
+        self.cell(max_w_name_stage, row_height, "Etapa", border='B',align='L')
+        if rol:
+            self.cell(max_w_employee, row_height, "Asesor", border='B',align='L')
+        self.cell(max_w_id_client, row_height, "Cédula", border='B',align='L')
+        self.cell(max_w_client, row_height, "Cliente", border='B',align='L')
+        self.cell(max_w_stage_end_date, row_height, "Fecha", border='B',align='L')
+        self.cell(max_w_meeting_time, row_height, "Hora", border='B',align='L')
+        self.set_font("Times", "", 12)
+
+    def content(self,data,rol):
+        print(rol)
+
+        self.set_fill_color(255,255,255)
+        max_w_employee =0
+        if rol:
+            max_w_employee = self.get_max_width(data,"employee") *0.7
+        max_w_client = self.get_max_width(data,"client")*0.6
+        max_w_id_client = self.get_max_width(data,"id_client")* 0.8
+        max_w_id_id_stage = self.get_max_width(data,"id_stage") *2
+        max_w_name_stage = self.get_max_width(data,"name_stage")*0.55
+        max_w_stage_end_date = self.get_max_width(data,"stage_end_date") *0.7
+        max_w_meeting_time = self.get_max_width(data,"meeting_time")*0.8
         
+        page_width = self.w
+        table_width = 0
+        if rol:
+            table_width = max_w_employee+ max_w_client + max_w_id_client + max_w_id_id_stage + max_w_name_stage + max_w_stage_end_date+max_w_meeting_time
+        else:
+            table_width = max_w_client + max_w_id_client + max_w_id_id_stage + max_w_name_stage + max_w_stage_end_date+max_w_meeting_time
+
+        self.x_pdf = (page_width - table_width) / 2
+        print({page_width,table_width,self.x_pdf})
+
+        row_height = self.font_size * 2
+
+        self.encabezado(rol,max_w_employee,max_w_client,max_w_id_client,max_w_id_id_stage,max_w_name_stage,max_w_stage_end_date,max_w_meeting_time,row_height)   
+        self.ln() 
+        #self.cell(col_name_width, row_height, "Etapa", border="B")
+        #self.cell(col_duration_width, row_height, "Asistencia", border="B")
+        #self.cell(col_condition_width, row_height, "Aprobado", border="B")
+        
+        max_n = 0
+        for row in data:
+            if max_n ==8:
+                #self.add_page()
+                self.set_auto_page_break(0)
+                self.add_page(orientation='L')
+                self.encabezado(rol,max_w_employee,max_w_client,max_w_id_client,max_w_id_id_stage,max_w_name_stage,max_w_stage_end_date,max_w_meeting_time,row_height)
+                self.ln()
+                max_n = 0
+            self.set_xy(self.x_pdf, self.y)
+            self.cell(max_w_id_id_stage, row_height, str(row['id_stage']), 0, 0, 'C', 1)
+            self.cell(max_w_name_stage, row_height, str(row['name_stage']), 0, 0, 'L', 1)
+            if rol:
+                self.cell(max_w_employee, row_height, str(row['employee']), 0, 0, 'L', 1)
+                
+            self.cell(max_w_id_client, row_height, str(row['id_client']), 0, 0, 'L', 1)
+            self.cell(max_w_client, row_height, str(row['client']), 0, 0, 'L', 1)
+            self.cell(max_w_stage_end_date, row_height, str(row['stage_end_date']), 0, 0, 'L', 1)
+            self.cell(max_w_meeting_time, row_height, str(row['meeting_time']), 0, 0, 'L', 1)
+            self.ln()
+            max_n +=1
+                     
 
     def footer(self) -> None:
         # Posición a 1.5 cm del fondo

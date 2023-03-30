@@ -4,6 +4,14 @@ import datetime
 import hashlib
 import uuid
 
+def segundos_a_tiempo(segundos):
+    horas = segundos // 3600
+    segundos_restantes = segundos % 3600
+    minutos = segundos_restantes // 60
+    segundos_restantes = segundos_restantes % 60
+    return f"{horas:02}:{minutos:02}:{segundos_restantes:02}"
+
+
 def response2dict(answer:dict):
     res = {}
     for key, value in answer.items():
@@ -36,7 +44,6 @@ def generar_uuid():
     new_uuid = uuid.uuid4()
     final_uuid_str = "{}-{}-{}-{}-{}".format(new_uuid.hex[0:8], new_uuid.hex[8:12], new_uuid.hex[12:16], new_uuid.hex[16:20], new_uuid.hex[20:])
     return final_uuid_str
-
 
 def sumar_fechas(fecha, n):
     # Convertir la cadena en un objeto datetime.date

@@ -660,6 +660,7 @@ def get_next_data(request: Request):
             sql = "SELECT * FROM EMPLOYEE WHERE id_employee = %s;"
             cursor.execute(sql, (id_employee))
             answer = cursor.fetchone()
+            position = answer["POSITION_EMPLOYEE"]
 
         with conn.cursor() as cursor:
             cursor.execute(
@@ -677,7 +678,7 @@ def get_next_data(request: Request):
                 raise HTTPException(
                     status_code=404, detail="Clients not found")
 
-            return [response2dict(answer=ans) for ans in answer]
+            return [response2dict(answer=ans) for ans in answer],position
 
     except HTTPException as e:
         raise e
@@ -688,9 +689,10 @@ def get_next_data(request: Request):
 @client.get('/api/report/nextDate')
 async def get_next_data_report(request: Request):
 
-    data = get_next_data(request)
+    data,position = get_next_data(request)
     pdf = ReportNextDate()
-    pdf.content(data)
+    print(position)
+    pdf.content(data,position=="Secretaria")
     pdf.output('reporte_citas.pdf', 'F')
 
     # Crear un archivo temporal para almacenar el PDF
@@ -707,4 +709,3 @@ async def get_next_data_report(request: Request):
     response = Response(content=content, media_type='application/pdf')
     response.headers['Content-Disposition'] = f'attachment; filename= reserva.pdf'
     return response
-    return data
