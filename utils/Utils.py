@@ -20,15 +20,15 @@ def get_cookies(request):
 
 def addThreeMonths(dateString):
     try:
-        inputDate = datetime.datetime.strptime(dateString, "%Y-%m-%d %H:%M:%S")
+        inputDate = datetime.datetime.strptime(dateString, "%Y-%m-%d")
     except ValueError:
-        return "Invalid date format. Use YYYY-MM-DD HH:MM:SS."
+        return "Invalid date format. Use YYYY-MM-DD."
 
     # Agregamos los tres meses
     newDate = inputDate + datetime.timedelta(days=3*30)
 
     # Convertimos la fecha resultante de vuelta al formato 'YYYY-MM-DD HH:MM:SS'
-    newDateFormatted = newDate.strftime('%Y-%m-%d %H:%M:%S')
+    newDateFormatted = newDate.strftime('%Y-%m-%d')
 
     return newDateFormatted
 

@@ -100,13 +100,13 @@ async def get_client_by_lastname(lastname: str, request: Request):
 
 @client.put('/api/clients/insert/economiccard')
 async def insert_data_client(client: InsertEconomicData, request: Request):
-    print(client)
+    #print(client)
     dic = {"finishes": "Acabados", "property_type": "Tipo de propiedad",
            "floors": "Pisos",  "value": "Costos", "construction": "Contruccion m2", "terrain": "Terreno m2"}
     
-    fecha_hora_str = client.date_reunion
-    fecha_hora = dt.datetime.strptime(fecha_hora_str, "%Y-%m-%dT%H:%M")
-    fecha_hora_formatted = fecha_hora.strftime('%Y-%m-%d %H:%M:%S')
+    #fecha_hora_str = client.date_reunion
+    #fecha_hora = dt.datetime.strptime(fecha_hora_str, "%Y-%m-%dT%H:%M")
+    #fecha_hora_formatted = fecha_hora.strftime('%Y-%m-%d %H:%M:%S')
 
     try:
         conn = connection()
@@ -120,7 +120,7 @@ async def insert_data_client(client: InsertEconomicData, request: Request):
 
         with conn.cursor() as cursor:
             sql = "INSERT INTO BUY (ID_CLIENT, ID_TERRAIN, PAYMENT_DATE, PAYMENT_VALUE) VALUES(%s, %s, %s , %s);"
-            values = (client.id_client, client.id_property, fecha_hora_formatted,client.payment)
+            values = (client.id_client, client.id_property, client.date_reunion,client.payment)
             cursor.execute(sql, values)
         conn.commit()
 
@@ -135,7 +135,7 @@ async def insert_data_client(client: InsertEconomicData, request: Request):
 
         print("insert property ok")
 
-        dates = [fecha_hora_formatted]
+        dates = [client.date_reunion]
 
         for i in range(8):
             if i != 0:
