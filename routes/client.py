@@ -100,19 +100,20 @@ async def get_client_by_lastname(lastname: str, request: Request):
 
 @client.put('/api/clients/insert/economiccard')
 async def insert_data_client(client: InsertEconomicData, request: Request):
-    #print(client)
+    # print(client)
     dic = {"finishes": "Acabados", "property_type": "Tipo de propiedad",
            "floors": "Pisos",  "value": "Costos", "construction": "Contruccion m2", "terrain": "Terreno m2"}
-    
-    #fecha_hora_str = client.date_reunion
-    #fecha_hora = dt.datetime.strptime(fecha_hora_str, "%Y-%m-%dT%H:%M")
-    #fecha_hora_formatted = fecha_hora.strftime('%Y-%m-%d %H:%M:%S')
+
+    # fecha_hora_str = client.date_reunion
+    # fecha_hora = dt.datetime.strptime(fecha_hora_str, "%Y-%m-%dT%H:%M")
+    # fecha_hora_formatted = fecha_hora.strftime('%Y-%m-%d %H:%M:%S')
 
     try:
         conn = connection()
         with conn.cursor() as cursor:
             sql = "UPDATE CLIENT SET SPOUSE_NAME = %s, SPOUSE_OCUPATION = %s, SPOUSE_DIRECTION = %s, SPOUSE_SALARY = %s, SPOUSE_ENTITY = %s, OCUPATION_CLIENT = %s, SALARY_CLIENT = %s, ENTITY_CLIENT = %s, DIRECTION_ENTITY = %s ,CLIENT_POSITION = %s WHERE ID_CLIENT = %s"
-            values = (client.spouse_lastname, client.spouse_ocupation, client.spouse_direction, client.spouse_salary, client.spouse_entity,client.client_ocupation, client.client_salary, client.client_entity, client.entity_direction, client.client_position,client.id_client)
+            values = (client.spouse_lastname, client.spouse_ocupation, client.spouse_direction, client.spouse_salary, client.spouse_entity,
+                      client.client_ocupation, client.client_salary, client.client_entity, client.entity_direction, client.client_position, client.id_client)
             cursor.execute(sql, values)
         conn.commit()
 
@@ -120,7 +121,8 @@ async def insert_data_client(client: InsertEconomicData, request: Request):
 
         with conn.cursor() as cursor:
             sql = "INSERT INTO BUY (ID_CLIENT, ID_TERRAIN, PAYMENT_DATE, PAYMENT_VALUE) VALUES(%s, %s, %s , %s);"
-            values = (client.id_client, client.id_property, client.date_reunion,client.payment)
+            values = (client.id_client, client.id_property,
+                      client.date_reunion, client.payment)
             cursor.execute(sql, values)
         conn.commit()
 
@@ -129,7 +131,7 @@ async def insert_data_client(client: InsertEconomicData, request: Request):
 
         with conn.cursor() as cursor:
             sql = "INSERT INTO PROPERTY (ID_TERRAIN, ID_PROPERTY,ID_CLIENT) VALUES(%s, %s,%s);"
-            values = (client.id_property, id_property,client.id_client)
+            values = (client.id_property, id_property, client.id_client)
             cursor.execute(sql, values)
         conn.commit()
 
@@ -146,7 +148,7 @@ async def insert_data_client(client: InsertEconomicData, request: Request):
             sql = "INSERT INTO STAGE_CLIENT (ID_CLIENT, ID_STAGE, STAGE_START_DATE, STAGE_END_DATE, CONDITIONS,MEETING_TIME) VALUES (%s, %s, %s, %s, 0,%s);"
             with conn.cursor() as cursor:
                 cursor.execute(
-                    sql, (client.id_client, i+1, dates[i], dates[i+1],client.meeting_time))
+                    sql, (client.id_client, i+1, dates[i], dates[i+1], client.meeting_time))
             conn.commit()
 
         print("insert stage_client ok")
@@ -168,7 +170,7 @@ async def insert_data_client(client: InsertEconomicData, request: Request):
             values = (client.id_property)
             cursor.execute(sql, values)
         conn.commit()
-        
+
         print("update terrain ok")
 
         conn.close()
@@ -381,9 +383,9 @@ def get_stage_report_data(id_client: str):
             hour = cursor.fetchone()
             if hour == None:
                 raise HTTPException(status_code=404, detail="Hour not foud")
-            hour["MEETING_TIME"] = str( hour["MEETING_TIME"])
+            hour["MEETING_TIME"] = str(hour["MEETING_TIME"])
             print(hour)
-        
+
         with conn.cursor() as cursor:
             sql = "SELECT c.ID_CLIENT,c.NAME_CLIENT ,c.LASTNAME_CLIENT from CLIENT as c WHERE ID_CLIENT =  %s;"
             cursor.execute(sql, (id_client))
@@ -405,7 +407,7 @@ def get_stage_report_data(id_client: str):
             if stage == ():
                 raise HTTPException(status_code=404, detail="Stage not foud")
 
-        return response2dict(person), [response2dict(answer=ans) for ans in stage], response2dict(consultant) , response2dict(hour)
+        return response2dict(person), [response2dict(answer=ans) for ans in stage], response2dict(consultant), response2dict(hour)
 
     except HTTPException as e:
         raise e
@@ -416,13 +418,13 @@ def get_stage_report_data(id_client: str):
 @client.get('/api/reportstage/{id_client}')
 async def get_stage_report(id_client: str):
 
-    person, stages, consultant,hour = get_stage_report_data(id_client)
+    person, stages, consultant, hour = get_stage_report_data(id_client)
 
     pdf = ReportStages()
     name = person["name_client"] + " " + person["lastname_client"]
     # pdf.content(name, person["id_client"],consultant["email_employee"], stages)
     pdf.content(name, person["id_client"],
-                "kledesma@consorcioaccion.com", stages,hour)
+                "kledesma@consorcioaccion.com", stages, hour)
     pdf.output('reporte_proyecto.pdf', 'F')
 
     # Crear un archivo temporal para almacenar el PDF
@@ -460,13 +462,15 @@ async def get_stage_report(request: Request):
             answer = cursor.fetchone()
 
         with conn.cursor() as cursor:
-            cursor.execute("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''))")
-            #print(answer["POSITION_EMPLOYEE"])
+            #cursor.execute("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''))")
+            #print(id_employee)
             if (answer["POSITION_EMPLOYEE"] == "Secretaria"):
+                cursor.execute("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''))")
                 sql = "SELECT CONCAT(e.NAME_EMPLOYEE,' ',e.LASTNAME_EMPLOYEE) as \"employee\" ,sc.ID_CLIENT ,CONCAT(c.NAME_CLIENT ,' ',c.LASTNAME_CLIENT) as \"client\", sc.ID_STAGE , s.NAME_STAGE ,DATE(sc.STAGE_END_DATE) AS \"STAGE_END_DATE\" ,CAST(TIME_FORMAT(sc.MEETING_TIME, '%H:%i:%s') AS CHAR) AS MEETING_TIME FROM STAGE_CLIENT sc,STAGE s, CLIENT c ,EMPLOYEE e  ,SUBSCRIBE sb WHERE CONDITIONS = 0 AND s.ID_STAGE =sc.ID_STAGE AND sc.ID_CLIENT =c.ID_CLIENT AND sb.ID_EMPLOYEE = e.ID_EMPLOYEE AND sb.ID_CLIENT  = c.ID_CLIENT GROUP BY sc.ID_CLIENT ORDER BY sc.STAGE_END_DATE LIMIT 10"
                 cursor.execute(sql)
             else:
-                sql = "SELECT CONCAT(e.NAME_EMPLOYEE,' ',e.LASTNAME_EMPLOYEE) as employee , CONCAT(c.NAME_CLIENT ,' ',c.LASTNAME_CLIENT) as client , sc.ID_CLIENT , sc.ID_STAGE , s.NAME_STAGE ,sc.STAGE_END_DATE  ,CAST(TIME_FORMAT(sc.MEETING_TIME, '%H:%i:%s') AS CHAR) AS MEETING_TIME FROM STAGE_CLIENT sc,STAGE s ,EMPLOYEE e ,CLIENT c WHERE CONDITIONS = 0 AND s.ID_STAGE =sc.ID_STAGE AND sc.ID_CLIENT =c.ID_CLIENT AND e.ID_EMPLOYEE = %s GROUP BY sc.ID_CLIENT ORDER BY sc.STAGE_END_DATE LIMIT 10"
+                cursor.execute("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''))")
+                sql = "SELECT CONCAT(e.NAME_EMPLOYEE,' ',e.LASTNAME_EMPLOYEE) as employee,CONCAT(c.NAME_CLIENT ,' ',c.LASTNAME_CLIENT) as client , sc.ID_CLIENT,sc.ID_STAGE,s.NAME_STAGE,sc.STAGE_END_DATE, sc.MEETING_TIME FROM STAGE_CLIENT sc,STAGE s ,EMPLOYEE e ,CLIENT c WHERE CONDITIONS = 0 AND s.ID_STAGE =sc.ID_STAGE AND sc.ID_CLIENT =c.ID_CLIENT AND e.ID_EMPLOYEE = %s GROUP BY sc.ID_CLIENT ORDER BY sc.STAGE_END_DATE LIMIT 10"
                 cursor.execute(sql, (id_employee))
 
             answer = cursor.fetchall()
@@ -480,6 +484,7 @@ async def get_stage_report(request: Request):
         raise e
     except Exception as e:
         raise HTTPException(status_code=409, detail={e})
+
 
 @client.put('/api/update/stage')
 async def insert_data_client(stage: UpdateStage):
@@ -505,13 +510,15 @@ async def reschedule_stages(data: UpdateStage):
     try:
         with conn.cursor() as cursor:
             sql = "UPDATE STAGE_CLIENT SET MEETING_TIME = %s, STAGE_END_DATE = ADDDATE(NOW(), INTERVAL 1 MONTH) WHERE ID_STAGE = %s AND ID_CLIENT = %s"
-            cursor.execute(sql, (data.meeting_time,data.id_stage, data.id_client))
+            cursor.execute(
+                sql, (data.meeting_time, data.id_stage, data.id_client))
         conn.commit()
         meses = 3
         for i in range(int(data.id_stage), 7):
             with conn.cursor() as cursor:
                 sql = "UPDATE STAGE_CLIENT SET MEETING_TIME = %s, STAGE_END_DATE = DATE_ADD( (SELECT t.STAGE_END_DATE FROM (SELECT STAGE_END_DATE FROM STAGE_CLIENT WHERE ID_STAGE = %s AND ID_CLIENT = %s) t ), INTERVAL %s MONTH) WHERE ID_STAGE = %s AND ID_CLIENT = %s;"
-                values = (data.meeting_time,data.id_stage, data.id_client, meses, i+1, data.id_client)
+                values = (data.meeting_time, data.id_stage,
+                          data.id_client, meses, i+1, data.id_client)
                 cursor.execute(sql, values)
             meses += 3
             conn.commit()
@@ -519,7 +526,7 @@ async def reschedule_stages(data: UpdateStage):
         for i in range(int(data.id_stage), 7):
             with conn.cursor() as cursor:
                 sql = "UPDATE STAGE_CLIENT SET STAGE_START_DATE = ( SELECT sub.STAGE_END_DATE from(	SELECT STAGE_END_DATE from STAGE_CLIENT			WHERE ID_STAGE = %s AND ID_CLIENT = %s) sub)  WHERE ID_STAGE = %s AND ID_CLIENT = %s"
-                values = (i,data.id_client,i+1,data.id_client)
+                values = (i, data.id_client, i+1, data.id_client)
                 cursor.execute(sql, values)
             conn.commit()
 
@@ -536,7 +543,7 @@ def get_data_report_reservation(id_client):
             sql = "SELECT c.*, p.ID_TERRAIN FROM CLIENT c JOIN PROPERTY p ON c.ID_CLIENT = p.ID_CLIENT WHERE p.ID_CLIENT = %s"
             cursor.execute(sql, (id_client))
             person = cursor.fetchone()
-            #print(person)
+            # print(person)
             if person == ():
                 raise HTTPException(status_code=404, detail="Stage not foud")
 
@@ -544,15 +551,15 @@ def get_data_report_reservation(id_client):
             sql = "SELECT f.NAME_FEATURE ,fp.VALUE_FEATURE FROM FEATURE f JOIN FEATUREPROPERTY fp ON f.ID_FEATURE = fp.ID_FEATURE JOIN PROPERTY p ON fp.ID_PROPERTY = p.ID_PROPERTY JOIN BUY b ON p.ID_TERRAIN = b.ID_TERRAIN AND p.ID_CLIENT = b.ID_CLIENT WHERE b.ID_CLIENT = %s"
             cursor.execute(sql, (id_client))
             features = cursor.fetchall()
-            #print(features)
+            # print(features)
 
         with conn.cursor() as cursor:
             sql = "SELECT e.NAME_EMPLOYEE , e.LASTNAME_EMPLOYEE  FROM EMPLOYEE e ,SUBSCRIBE s WHERE e.ID_EMPLOYEE = s.ID_EMPLOYEE and s.ID_CLIENT = %s"
             cursor.execute(sql, (id_client))
             consultant = cursor.fetchone()
-            #print(consultant)
+            # print(consultant)
 
-        #return person,consultant,features
+        # return person,consultant,features
         return response2dict(person), [response2dict(answer=ans) for ans in features], response2dict(consultant)
 
     except HTTPException as e:
@@ -560,12 +567,14 @@ def get_data_report_reservation(id_client):
     except Exception as e:
         raise HTTPException(status_code=409, detail={e})
 
+
 @client.get('/api/report/reservation/{id_client}')
 async def get_reservation_report(id_client: str):
-    client,features,consultant = get_data_report_reservation(id_client=id_client)
+    client, features, consultant = get_data_report_reservation(
+        id_client=id_client)
     pdf = ReportReservation()
-    
-    pdf.content(client,features,consultant)
+
+    pdf.content(client, features, consultant)
     pdf.output('reporte_reserva.pdf', 'F')
 
     # Crear un archivo temporal para almacenar el PDF
@@ -583,9 +592,10 @@ async def get_reservation_report(id_client: str):
     response.headers['Content-Disposition'] = f'attachment; filename= reserva.pdf'
     return response
 
-def get_sales_data(month:str):
+
+def get_sales_data(month: str):
     conn = connection()
-    
+
     if month == "0":
         sql = "SELECT c.ID_CLIENT ,CONCAT(c.NAME_CLIENT, ' ', c.LASTNAME_CLIENT) AS FULLNAME_CLIENT ,CONCAT(e.NAME_EMPLOYEE, ' ', e.LASTNAME_EMPLOYEE) AS FULLNAME_EMPLOYEE ,MONTH(PAYMENT_DATE) AS MONTHP, b.ID_TERRAIN ,b.PAYMENT_VALUE FROM BUY b, CLIENT c, EMPLOYEE e, SUBSCRIBE s WHERE c.ID_CLIENT = b.ID_CLIENT AND YEAR(CURRENT_DATE()) = YEAR(PAYMENT_DATE) AND s.ID_EMPLOYEE = e.ID_EMPLOYEE AND c.ID_CLIENT = s.ID_CLIENT ORDER BY PAYMENT_DATE;"
         values = ()
@@ -595,10 +605,10 @@ def get_sales_data(month:str):
 
     try:
         with conn.cursor() as cursor:
-            #print(values)
+            # print(values)
             cursor.execute(sql, values)
             answer = cursor.fetchall()
-            #print(answer)
+            # print(answer)
             if answer == None:
                 raise HTTPException(status_code=404, detail="Sales not foud")
 
@@ -609,9 +619,10 @@ def get_sales_data(month:str):
     except Exception as e:
         raise HTTPException(status_code=409, detail={e})
 
+
 @client.get('/api/report/sales/{month}')
-async def get_sales_report(month: str ):
-    
+async def get_sales_report(month: str):
+
     data = get_sales_data(month)
     pdf = ReportSell()
     pdf.content(data)
@@ -632,6 +643,7 @@ async def get_sales_report(month: str ):
     response.headers['Content-Disposition'] = f'attachment; filename= reserva.pdf'
     return response
 
+
 def get_next_data(request: Request):
     conn = connection()
     try:
@@ -650,8 +662,9 @@ def get_next_data(request: Request):
             answer = cursor.fetchone()
 
         with conn.cursor() as cursor:
-            cursor.execute("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''))")
-            #print(answer["POSITION_EMPLOYEE"])
+            cursor.execute(
+                "SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''))")
+            # print(answer["POSITION_EMPLOYEE"])
             if (answer["POSITION_EMPLOYEE"] == "Secretaria"):
                 sql = "SELECT CONCAT(e.NAME_EMPLOYEE,' ',e.LASTNAME_EMPLOYEE) as \"employee\" ,sc.ID_CLIENT ,CONCAT(c.NAME_CLIENT ,' ',c.LASTNAME_CLIENT) as \"client\", sc.ID_STAGE , s.NAME_STAGE ,DATE(sc.STAGE_END_DATE) AS \"STAGE_END_DATE\" ,CAST(TIME_FORMAT(sc.MEETING_TIME, '%H:%i:%s') AS CHAR) AS MEETING_TIME FROM STAGE_CLIENT sc,STAGE s, CLIENT c ,EMPLOYEE e  ,SUBSCRIBE sb WHERE CONDITIONS = 0 AND s.ID_STAGE =sc.ID_STAGE AND sc.ID_CLIENT =c.ID_CLIENT AND sb.ID_EMPLOYEE = e.ID_EMPLOYEE AND sb.ID_CLIENT  = c.ID_CLIENT GROUP BY sc.ID_CLIENT ORDER BY sc.STAGE_END_DATE LIMIT 10"
                 cursor.execute(sql)
@@ -671,9 +684,10 @@ def get_next_data(request: Request):
     except Exception as e:
         raise HTTPException(status_code=409, detail={e})
 
+
 @client.get('/api/report/nextDate')
 async def get_next_data_report(request: Request):
-    
+
     data = get_next_data(request)
     pdf = ReportNextDate()
     pdf.content(data)
