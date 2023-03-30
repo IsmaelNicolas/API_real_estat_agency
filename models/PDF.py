@@ -508,12 +508,11 @@ class ReportNextDate(FPDF):
             self.ln()
             max_n +=1
                      
-
     def footer(self) -> None:
         # Posición a 1.5 cm del fondo
         self.set_y(-15)
         # Arial italic 8
-        self.set_font('Arial', 'I', 8)
+        self.set_font('Times', 'B', 12)
         self.cell(0, 10, str(self.page_no()), 0, 1,align='C')
 
     def get_max_width(self, items, attribute):
