@@ -382,7 +382,7 @@ def get_stage_report_data(id_client: str):
             cursor.execute(sql, (id_client))
             hour = cursor.fetchone()
             if hour == None:
-                raise HTTPException(status_code=404, detail="Hour not foud")
+                raise HTTPException(status_code=404, detail="person not foud")
             hour["MEETING_TIME"] = str(hour["MEETING_TIME"])
             print(hour)
 
@@ -419,6 +419,7 @@ def get_stage_report_data(id_client: str):
 async def get_stage_report(id_client: str):
 
     person, stages, consultant, hour = get_stage_report_data(id_client)
+    print(person)
 
     pdf = ReportStages()
     name = person["name_client"] + " " + person["lastname_client"]

@@ -109,7 +109,7 @@ class ReportStages(FPDF):
         primera_etapa = True
 
         self.ln()
-        for etapa in etapas:
+        for etapa in etapas[:-1]:
             self.set_fill_color(r,g,b)
             self.set_xy(self.x_pdf, self.y)
             #print(etapa["conditions"])
